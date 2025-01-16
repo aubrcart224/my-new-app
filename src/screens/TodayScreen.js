@@ -139,11 +139,11 @@ export default function TodayScreen() {
         <View style={styles.notesGrid}>
           {/* “+” card for a new note */}
           <View style={styles.noteCardAdd}>
-            <Ionicons name="add" size={40} color="#ccc" />
+            <Ionicons name="add" size={75} color="#ccc" />
           </View>
           {/* Example Note 1 */}
           <View style={styles.noteCard}>
-            <Text style={styles.noteTitle}>Lorem ipsum dolor sit amet.</Text>
+            <Text style={styles.noteTitle}>Note 1</Text>
             <Text style={styles.noteBody}>
               Consectetur adipiscing elit, sed do eiusmod...
             </Text>
@@ -182,7 +182,7 @@ const styles = StyleSheet.create({
 
   // 1) HEADER
   headerWrapper: {
-    backgroundColor: '#000',
+    backgroundColor: '#222',
     paddingTop: 50, // so text is below the status bar
     paddingBottom: 20,
     paddingHorizontal: 20,
@@ -203,7 +203,7 @@ const styles = StyleSheet.create({
 
   // 2) QUOTE SECTION
   quoteContainer: {
-    backgroundColor: '#333',
+    backgroundColor: '#222',
     paddingVertical: 20,
     paddingHorizontal: 20,
     borderBottomLeftRadius: 20,
@@ -238,11 +238,11 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   dayTitle: {
-    fontSize: 20,
-    fontWeight: '600',
+    fontSize: 24,
+    fontWeight: '700',
   },
   skipText: {
-    color: '#888',
+    color: '#555',
   },
 
   // Horizontal Dates
@@ -250,7 +250,7 @@ const styles = StyleSheet.create({
     width: 60,
     height: 70,
     marginRight: 10,
-    backgroundColor: '#f3f3f3',
+    backgroundColor: '#dadada',
     borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
@@ -285,7 +285,7 @@ const styles = StyleSheet.create({
   // Lesson / Audio Card
   lessonCard: {
     flexDirection: 'row',
-    backgroundColor: '#fafafa',
+    backgroundColor: '#e5e5e5', // shades of gray here
     borderRadius: 10,
     padding: 10,
     marginTop: 10,
@@ -344,7 +344,7 @@ const styles = StyleSheet.create({
     width: '48%',
     aspectRatio: 1,
     borderRadius: 10,
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: '#ddd',
     borderStyle: 'dashed',
     justifyContent: 'center',
@@ -355,22 +355,24 @@ const styles = StyleSheet.create({
     width: '48%',
     aspectRatio: 1,
     backgroundColor: '#fff',
-    borderRadius: 10,
+    borderRadius: 12,
     padding: 10,
     marginBottom: 10,
     borderWidth: 1.5,
     borderColor: '#dadada',
   },
   noteTitle: {
-    fontWeight: '600',
-    marginBottom: 5,
+    fontWeight: '500',
+    marginBottom: 10,
     fontSize: 14,
+    padding:4,
   },
   noteBody: {
     fontSize: 12,
     color: '#666',
     marginBottom: 10,
     flex: 1,
+    padding:4,
   },
   noteFooter: {
     fontSize: 10,
