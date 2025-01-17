@@ -12,35 +12,30 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function ViewNoteScreen({ route, navigation }) {
   const { note } = route.params;
+  console.log('Viewing note:', note);
+  console.log('Note ID:', note.id);
 
   const deleteNote = async () => {
-    Alert.alert(
-      "Delete Note",
-      "Are you sure you want to delete this note?",
-      [
-        {
-          text: "Cancel",
-          style: "cancel"
-        },
-        { 
-          text: "Delete", 
-          onPress: async () => {
-            try {
-              const savedNotes = await AsyncStorage.getItem('notes');
-              if (savedNotes) {
-                let notes = JSON.parse(savedNotes);
-                notes = notes.filter(n => n.id !== note.id);
-                await AsyncStorage.setItem('notes', JSON.stringify(notes));
-                navigation.navigate('Today', { refresh: true });
-              }
-            } catch (error) {
-              console.error('Error deleting note:', error);
-            }
-          },
-          style: "destructive"
-        }
-      ]
-    );
+    console.log('Delete button pressed');
+    try {
+      console.log('Attempting to delete note with id:', note.id);
+      const savedNotes = await AsyncStorage.getItem('notes');
+      console.log('Saved notes retrieved:', savedNotes);
+      if (savedNotes) {
+        let notes = JSON.parse(savedNotes);
+        console.log('Parsed notes:', notes);
+        notes = notes.filter(n => n.id !== note.id);
+        console.log('Notes after deletion:', notes);
+        await AsyncStorage.setItem('notes', JSON.stringify(notes));
+        console.log('Notes successfully updated in AsyncStorage');
+        navigation.navigate('Today', { refresh: true });
+      } else {
+        console.log('No notes found in AsyncStorage');
+      }
+    } catch (error) {
+      console.error('Error deleting note:', error);
+      Alert.alert("Error", "Failed to delete the note. Please try again.");
+    }
   };
 
   return (

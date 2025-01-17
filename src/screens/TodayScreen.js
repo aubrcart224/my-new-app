@@ -26,17 +26,29 @@ export default function TodayScreen({ navigation, route }) {
     try {
       const savedNotes = await AsyncStorage.getItem('notes');
       if (savedNotes) {
-        setNotes(JSON.parse(savedNotes));
+        const parsedNotes = JSON.parse(savedNotes);
+        setNotes(parsedNotes);
+      } else {
+        setNotes([]);
+      }
+      // Reset the refresh parameter
+      if (route.params?.refresh) {
+        navigation.setParams({ refresh: false });
+      }
+      // Handle deleted note
+      if (route.params?.deletedNoteId) {
+        setNotes(prevNotes => prevNotes.filter(note => note.id !== route.params.deletedNoteId));
+        navigation.setParams({ deletedNoteId: null });
       }
     } catch (error) {
       console.error('Error loading notes:', error);
     }
-  }, []);
+  }, [navigation, route.params]);
 
   useFocusEffect(
     useCallback(() => {
       loadNotes();
-    }, [loadNotes])
+    }, [loadNotes, route.params?.refresh, route.params?.deletedNoteId])
   );
 
   const loadCompletedLessons = async () => {
@@ -117,7 +129,7 @@ export default function TodayScreen({ navigation, route }) {
           name={isQuoteVisible ? "chevron-up" : "chevron-down"} 
           size={24} 
           color="#fff" 
-          style={styles.icon} // Add this style
+          style={styles.icon} 
         />
         </TouchableOpacity>
         {isQuoteVisible && (
@@ -280,7 +292,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 
-  // issues here rn 
   quoteWrapper: {
     backgroundColor: '#222',
     borderBottomLeftRadius: 20,
@@ -292,17 +303,10 @@ const styles = StyleSheet.create({
     marginLeft: 10,
     marginBottom: 5, 
   },
-
-  /*
   quoteToggle: {
     alignItems: 'center',
     paddingVertical: 8,
-    borderBottomWidth: (isQuoteVisible) ? 1 : 0,
-    borderBottomColor: '#333',
   },
-  // to here 
-  */
-
   dayTitleRow: {
     flexDirection: 'row',
     alignItems: 'center',
