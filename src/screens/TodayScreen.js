@@ -75,8 +75,8 @@ export default function TodayScreen({ navigation, route }) {
       title: 'Unleash Yourself',
       duration: '3 minutes',
       type: 'Lesson',
-      imageUrl: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-ek4i5DyiuJJSCH5ST8bfaDNYmhM2xg.png',
-      audioUrl: 'YOUR_AUDIO_URL_HERE',
+      imageUrl: 'https://s3-alpha-sig.figma.com/img/367d/4e8a/e6b3fd0e6d5f593a5837de3c93ba1bf3?Expires=1737936000&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=UZAZ1-1EZFqAw~A~u3uWaVeiwgn8yjulGUKYqOI8LfxcUc8yNEI33GKc53NEBQeawtynokhfrfiQlriF2lC72FsRpdCXDJ5t8JWJIfOThz~ykvhWTZWrJF2p9uE1NWaXVjUZyjgNaQUlmUeJftS4NWAavVZu15wNcgeewFcQeMPYb1cDNZDnRpHEMwVQuJItNL8Ih0HCHnB~4vFT-jS3QuGduzZODkLNH43e-O8Ekdq-S3~qKrFH8gFH~HECcZmJVyvOvKG8yhQ3c87i4jMZZ~SIhu1kSeUuMBVfZmWhlmB9-M4MkCHXPhmWzN1hcwPX6S0ur0w7wWRyr8IllM5yew__',
+
       audioUrl: SAMPLE_AUDIO_FILES.unleash,
       subtitle: 'UNLEASH by Alex'
     },
@@ -85,7 +85,7 @@ export default function TodayScreen({ navigation, route }) {
       title: 'How to Improve Your Focus',
       duration: '5 minutes',
       type: 'Lesson',
-      imageUrl: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-cwVIxYX7Pb1dpp0rlQJjxBb4Zmx2zn.png',
+      imageUrl: 'https://s3-alpha-sig.figma.com/img/12c8/a01d/3409d6897e456d4e5e623490f9968017?Expires=1737936000&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=f2gZ4nS-KNshW6eWeb31O1Vi8Q9LTRK~Hy-JNcTd7SapdOMqs~INY9tyEmh765~L2u3C4VjK65Hr~~XXD9x7D8yoI9cGkd2EPJ9Fnpyg2WslAMoAhhmoZwYcskCHiRaGMQI2maYcC6O2iVKbazk3Q4Z50bL8dPan~eC8p8YJvhzF~sset1REq92trG5KuZgxTFYGrtQ~2EvCj680cuuKOBottau8onZGYLNC5cYQWN8Cbj0ZBCzqbQF9HSalBNw7MJ6ZflA0Wo2ju6o63nrQXwromkg8QUigJCP4JIRkM88QWCMzDbxpT6Wm4IKw3iMX~CjeQfO9CaeC6E66OsMvqw__',
       audioUrl: SAMPLE_AUDIO_FILES.focus,
       subtitle: 'IMPROVE by Alex'
     },
@@ -94,7 +94,7 @@ export default function TodayScreen({ navigation, route }) {
       title: 'Walk 20,000 Steps',
       duration: 'Daily Goal',
       type: 'Goal',
-      imageUrl: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-BhSVg6SrTuGVOZxoDN25l1FnxwFACf.png',
+      imageUrl: 'https://s3-alpha-sig.figma.com/img/98d9/8a02/bd75cf0a1f8a6fe008febd7c1500bf2d?Expires=1737936000&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=GjToL3sjfLpSP-iAtoZNpVZ9mz4Gv8rMPo0tH9xweNXVegV7ibcAkfrJP1hPci~tG4hz2TtTNots08-uBO1cM0UiTlJEdorRiRN9J8ObDtrm625nleXixuudoRbUI16trqKCXnazYE5WAyl0p-kEYr-~q0sqCpB79NTB7IqH9uoydcnzLmmiByhmbTFUatZOQ75WYre7QIDMXoH6SwbnL~1wdK4lmsjWmGDcaDrRFCSmNWP3dY95Gr6LZynvIUgqdHX8WDG0XTLkkJ9FVc1boArUCNc7Xf7ktFxyvJFnEXpng73OlBjve8NCV9axQmoULlUSBf~DmizAYwwf28-jHg__',
     },
   ];
 
