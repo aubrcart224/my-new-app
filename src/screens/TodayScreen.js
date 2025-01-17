@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   View,
   Text,
@@ -10,9 +10,15 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
+import LessonCard from '../components/LessonCard';
+import AudioPlayerModal from '../components/AudioPlayerModal'
+
 
 export default function TodayScreen({ navigation, route }) {
   const [notes, setNotes] = useState([]);
+  const [completedLessons, setCompletedLessons] = useState([]);
+  const [selectedLesson, setSelectedLesson] = useState(null);
+  const [showAudioPlayer, setShowAudioPlayer] = useState(false);
 
   const loadNotes = useCallback(async () => {
     try {
@@ -30,6 +36,62 @@ export default function TodayScreen({ navigation, route }) {
       loadNotes();
     }, [loadNotes])
   );
+
+  const loadCompletedLessons = async () => {
+    try {
+      const saved = await AsyncStorage.getItem('completedLessons');
+      if (saved) {
+        setCompletedLessons(JSON.parse(saved));
+      }
+    } catch (error) {
+      console.error('Error loading completed lessons:', error);
+    }
+  };
+
+  useEffect(() => {
+    loadCompletedLessons();
+  }, []);
+
+  const handleLessonComplete = async (lessonId) => {
+    try {
+      const newCompletedLessons = [...completedLessons, lessonId];
+      setCompletedLessons(newCompletedLessons);
+      await AsyncStorage.setItem('completedLessons', JSON.stringify(newCompletedLessons));
+    } catch (error) {
+      console.error('Error saving completed lesson:', error);
+    }
+  };
+
+  const handleLessonPress = (lesson) => {
+    setSelectedLesson(lesson);
+    setShowAudioPlayer(true);
+  };
+
+  const lessons = [
+    {
+      id: 1,
+      title: 'Unleash Yourself',
+      duration: '3 minutes',
+      type: 'Lesson',
+      imageUrl: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-ek4i5DyiuJJSCH5ST8bfaDNYmhM2xg.png',
+      audioUrl: 'YOUR_AUDIO_URL_HERE',
+    },
+    {
+      id: 2,
+      title: 'How to Improve Your Focus',
+      duration: '5 minutes',
+      type: 'Lesson',
+      imageUrl: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-cwVIxYX7Pb1dpp0rlQJjxBb4Zmx2zn.png',
+      audioUrl: 'YOUR_AUDIO_URL_HERE',
+    },
+    {
+      id: 3,
+      title: 'Walk 20,000 Steps',
+      duration: 'Daily Goal',
+      type: 'Goal',
+      imageUrl: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-BhSVg6SrTuGVOZxoDN25l1FnxwFACf.png',
+    },
+  ];
 
   return (
     <View style={styles.container}>
@@ -96,47 +158,16 @@ export default function TodayScreen({ navigation, route }) {
         </ScrollView>
 
         {/* Lesson / Audio Cards */}
-        <View style={styles.lessonCard}>
-          <Image
-            source={{ uri: 'https://via.placeholder.com/150' }}
-            style={styles.lessonImage}
+        {lessons.map((lesson, index) => (
+          <LessonCard
+            key={lesson.id}
+            lesson={lesson}
+            onPress={handleLessonPress}
+            onComplete={handleLessonComplete}
+            isCompleted={completedLessons.includes(lesson.id)}
+            isLocked={index > completedLessons.length}
           />
-          <View style={styles.lessonDetails}>
-            <Text style={styles.lessonTitle}>Unleash Yourself</Text>
-            <Text style={styles.lessonSub}>4 minutes • Lesson</Text>
-          </View>
-          <TouchableOpacity style={styles.lessonPlayButton}>
-            <Ionicons name="play" size={20} color="#fff" />
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.lessonCard}>
-          <Image
-            source={{ uri: 'https://via.placeholder.com/150' }}
-            style={styles.lessonImage}
-          />
-          <View style={styles.lessonDetails}>
-            <Text style={styles.lessonTitle}>Improve Your Focus</Text>
-            <Text style={styles.lessonSub}>5 minutes • Lesson</Text>
-          </View>
-          <TouchableOpacity style={styles.lessonPlayButton}>
-            <Ionicons name="play" size={20} color="#fff" />
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.lessonCard}>
-          <Image
-            source={{ uri: 'https://via.placeholder.com/150' }}
-            style={styles.lessonImage}
-          />
-          <View style={styles.lessonDetails}>
-            <Text style={styles.lessonTitle}>Walk 20,000 Steps</Text>
-            <Text style={styles.lessonSub}>Daily Goal</Text>
-          </View>
-          <TouchableOpacity style={styles.lessonPlayButton}>
-            <Ionicons name="play" size={20} color="#fff" />
-          </TouchableOpacity>
-        </View>
+        ))}
 
         {/* Notes Section */}
         <View style={styles.notesHeaderRow}>
@@ -173,6 +204,11 @@ export default function TodayScreen({ navigation, route }) {
           ))}
         </View>
       </ScrollView>
+      <AudioPlayerModal
+        visible={showAudioPlayer}
+        onClose={() => setShowAudioPlayer(false)}
+        lesson={selectedLesson}
+      />
     </View>
   );
 }
