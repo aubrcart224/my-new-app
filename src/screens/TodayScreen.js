@@ -20,6 +20,7 @@ export default function TodayScreen({ navigation, route }) {
   const [completedLessons, setCompletedLessons] = useState([]);
   const [selectedLesson, setSelectedLesson] = useState(null);
   const [showAudioPlayer, setShowAudioPlayer] = useState(false);
+  const [isQuoteVisible, setIsQuoteVisible] = useState(true);
 
   const loadNotes = useCallback(async () => {
     try {
@@ -77,6 +78,7 @@ export default function TodayScreen({ navigation, route }) {
       imageUrl: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-ek4i5DyiuJJSCH5ST8bfaDNYmhM2xg.png',
       audioUrl: 'YOUR_AUDIO_URL_HERE',
       audioUrl: SAMPLE_AUDIO_FILES.unleash,
+      subtitle: 'UNLEASH by Alex'
     },
     {
       id: 2,
@@ -85,6 +87,7 @@ export default function TodayScreen({ navigation, route }) {
       type: 'Lesson',
       imageUrl: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-cwVIxYX7Pb1dpp0rlQJjxBb4Zmx2zn.png',
       audioUrl: SAMPLE_AUDIO_FILES.focus,
+      subtitle: 'IMPROVE by Alex'
     },
     {
       id: 3,
@@ -106,12 +109,27 @@ export default function TodayScreen({ navigation, route }) {
       </View>
 
       {/* Quote Section */}
-      <View style={styles.quoteContainer}>
-        <Text style={styles.quoteIcon}>"</Text>
-        <Text style={styles.quoteText}>
-          If you don't get what you want, you SUFFER...
-        </Text>
-        <Text style={styles.quoteIcon}>"</Text>
+      <View style={styles.quoteWrapper}>
+        <TouchableOpacity 
+          style={styles.quoteToggle}
+          onPress={() => setIsQuoteVisible(!isQuoteVisible)}
+        >
+        <Ionicons 
+          name={isQuoteVisible ? "chevron-up" : "chevron-down"} 
+          size={24} 
+          color="#fff" 
+          style={styles.icon} // Add this style
+        />
+        </TouchableOpacity>
+        {isQuoteVisible && (
+          <View style={styles.quoteContainer}>
+            <Text style={styles.quoteIcon}>"</Text>
+            <Text style={styles.quoteText}>
+              If you don't get what you want, you SUFFER...
+            </Text>
+          <Text style={styles.quoteIcon}>"</Text>
+          </View>
+        )}
       </View>
 
       {/* Main Content */}
@@ -222,7 +240,7 @@ const styles = StyleSheet.create({
   },
   headerWrapper: {
     backgroundColor: '#222',
-    paddingTop: 50,
+    paddingTop: 32,
     paddingBottom: 20,
     paddingHorizontal: 20,
     position: 'relative',
@@ -230,7 +248,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     color: '#fff',
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: '700',
     textAlign: 'center',
   },
@@ -263,6 +281,30 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     flex: 1,
   },
+
+  // issues here rn 
+  quoteWrapper: {
+    backgroundColor: '#222',
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+    marginBottom: 10,
+    overflow: 'hidden',
+  },
+  icon: {
+    marginLeft: 10,
+    marginBottom: 5, 
+  },
+
+  /*
+  quoteToggle: {
+    alignItems: 'center',
+    paddingVertical: 8,
+    borderBottomWidth: (isQuoteVisible) ? 1 : 0,
+    borderBottomColor: '#333',
+  },
+  // to here 
+  */
+
   dayTitleRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -283,6 +325,7 @@ const styles = StyleSheet.create({
     marginRight: 10,
     backgroundColor: '#dadada',
     borderRadius: 10,
+    marginBottom: 20,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -369,7 +412,7 @@ const styles = StyleSheet.create({
   noteCardAdd: {
     width: '48%',
     aspectRatio: 1,
-    borderRadius: 10,
+    borderRadius: 12,
     borderWidth: 1.5,
     borderColor: '#ddd',
     borderStyle: 'dashed',
