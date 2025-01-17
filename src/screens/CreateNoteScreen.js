@@ -37,7 +37,7 @@ export default function CreateNoteScreen({ navigation }) {
       // Save back to storage
       await AsyncStorage.setItem('notes', JSON.stringify(notes));
       
-      navigation.goBack();
+      navigation.navigate('Today', { refresh: true });
     } catch (error) {
       console.error('Error saving note:', error);
     }
@@ -138,3 +138,4 @@ const styles = StyleSheet.create({
     lineHeight: 24,
   },
 });
+

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import {
   View,
@@ -84,3 +83,4 @@ const styles = StyleSheet.create({
     color: '#333',
   },
 });
+
