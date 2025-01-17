@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import Slider from '@react-native-community/slider';
 import { Ionicons } from '@expo/vector-icons';
+import { SAMPLE_AUDIO_FILES } from '../constants/audioFiles';
 
 let Audio;
 if (Platform.OS !== 'web') {
@@ -27,6 +28,13 @@ export default function AudioPlayerModal({ visible, onClose, lesson }) {
   const audioRef = useRef(null);
 
   useEffect(() => {
+    console.log('AudioPlayerModal mounted');
+    return () => {
+      console.log('AudioPlayerModal unmounted');
+    };
+  }, []);
+
+  useEffect(() => {
     return () => {
       if (Platform.OS !== 'web' && sound) {
         sound.unloadAsync();
@@ -35,36 +43,54 @@ export default function AudioPlayerModal({ visible, onClose, lesson }) {
   }, [sound]);
 
   const loadAudio = async () => {
-    console.log('Loading Audio');
+    const audioUrl = lesson.audioUrl;
+
+    if (!audioUrl) {
+      console.error('No audioUrl provided for the lesson.');
+      setError('No audio URL provided.');
+      setIsLoading(false);
+      return;
+    }
+
+    console.log('Loading Audio from lesson.audioUrl:', audioUrl);
+    
     try {
       setIsLoading(true);
       setError(null);
-      
+
       if (Platform.OS === 'web') {
-        const audio = new Audio(lesson.audioUrl);
-        audio.onloadedmetadata = () => {
+        const audio = new window.Audio();
+        
+        audio.onerror = (e) => {
+          console.error('Audio loading error:', e);
+          setError(`Failed to load audio: ${e.target.error.message}`);
+          setIsLoading(false);
+        };
+        
+        audio.oncanplaythrough = () => {
+          console.log('Audio can play through');
           setDuration(audio.duration * 1000);
           setIsLoading(false);
         };
-        audio.onerror = (e) => {
-          console.error('Audio loading error:', e);
-          setError('Failed to load audio');
-          setIsLoading(false);
-        };
+        
+        audio.crossOrigin = "anonymous";
+        audio.src = audioUrl;
+        
         audioRef.current = audio;
         setSound(audio);
       } else {
         const { sound: audioSound } = await Audio.Sound.createAsync(
-          { uri: lesson.audioUrl },
+          { uri: audioUrl },
           { shouldPlay: false },
           onPlaybackStatusUpdate
         );
+        console.log('Native audio loaded');
         setSound(audioSound);
+        setIsLoading(false);
       }
     } catch (error) {
       console.error('Error loading audio:', error);
       setError(`Failed to load audio: ${error.message}`);
-    } finally {
       setIsLoading(false);
     }
   };
@@ -76,7 +102,7 @@ export default function AudioPlayerModal({ visible, onClose, lesson }) {
     return () => {
       if (Platform.OS === 'web' && audioRef.current) {
         audioRef.current.pause();
-        audioRef.current.currentTime = 0;
+        audioRef.current.src = '';
       } else if (sound) {
         sound.unloadAsync();
       }
@@ -90,24 +116,43 @@ export default function AudioPlayerModal({ visible, onClose, lesson }) {
       setIsPlaying(status.isPlaying);
     } else if (status.error) {
       console.error(`Encountered a fatal error during playback: ${status.error}`);
-      setError('An error occurred during playback');
+      setError(`Playback error: ${status.error}`);
     }
   };
 
   const playPause = async () => {
-    if (Platform.OS === 'web' && audioRef.current) {
-      if (isPlaying) {
-        audioRef.current.pause();
+    try {
+      if (Platform.OS === 'web') {
+        if (!audioRef.current) {
+          setError('Audio is not loaded yet.');
+          return;
+        }
+
+        if (isPlaying) {
+          await audioRef.current.pause();
+        } else {
+          if (audioRef.current.readyState >= 2) {
+            await audioRef.current.play();
+          } else {
+            console.log('Audio not ready to play');
+            setError('Audio not ready to play. Please wait or try reloading.');
+            return;
+          }
+        }
+        setIsPlaying(!isPlaying);
       } else {
-        audioRef.current.play();
+        if (sound) {
+          if (isPlaying) {
+            await sound.pauseAsync();
+          } else {
+            await sound.playAsync();
+          }
+          setIsPlaying(!isPlaying);
+        }
       }
-      setIsPlaying(!isPlaying);
-    } else if (sound) {
-      if (isPlaying) {
-        await sound.pauseAsync();
-      } else {
-        await sound.playAsync();
-      }
+    } catch (error) {
+      console.error('Error in playPause:', error);
+      setError(`Playback error: ${error.message}`);
     }
   };
 

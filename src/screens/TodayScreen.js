@@ -72,22 +72,21 @@ export default function TodayScreen({ navigation, route }) {
   const lessons = [
     {
       id: 1,
-      title: 'Unleash Yourself',
+      title: 'Focus Session',
       duration: '3 minutes',
       type: 'Lesson',
       imageUrl: 'https://s3-alpha-sig.figma.com/img/367d/4e8a/e6b3fd0e6d5f593a5837de3c93ba1bf3?Expires=1737936000&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=UZAZ1-1EZFqAw~A~u3uWaVeiwgn8yjulGUKYqOI8LfxcUc8yNEI33GKc53NEBQeawtynokhfrfiQlriF2lC72FsRpdCXDJ5t8JWJIfOThz~ykvhWTZWrJF2p9uE1NWaXVjUZyjgNaQUlmUeJftS4NWAavVZu15wNcgeewFcQeMPYb1cDNZDnRpHEMwVQuJItNL8Ih0HCHnB~4vFT-jS3QuGduzZODkLNH43e-O8Ekdq-S3~qKrFH8gFH~HECcZmJVyvOvKG8yhQ3c87i4jMZZ~SIhu1kSeUuMBVfZmWhlmB9-M4MkCHXPhmWzN1hcwPX6S0ur0w7wWRyr8IllM5yew__',
-
-      audioUrl: SAMPLE_AUDIO_FILES.unleash,
-      subtitle: 'UNLEASH by Alex'
+      audioUrl: SAMPLE_AUDIO_FILES.focus,
+      subtitle: 'IMPROVE by Alex'
     },
     {
       id: 2,
-      title: 'How to Improve Your Focus',
-      duration: '5 minutes',
+      title: 'Unleash',
+      duration: '3 minutes',
       type: 'Lesson',
-      imageUrl: 'https://s3-alpha-sig.figma.com/img/12c8/a01d/3409d6897e456d4e5e623490f9968017?Expires=1737936000&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=f2gZ4nS-KNshW6eWeb31O1Vi8Q9LTRK~Hy-JNcTd7SapdOMqs~INY9tyEmh765~L2u3C4VjK65Hr~~XXD9x7D8yoI9cGkd2EPJ9Fnpyg2WslAMoAhhmoZwYcskCHiRaGMQI2maYcC6O2iVKbazk3Q4Z50bL8dPan~eC8p8YJvhzF~sset1REq92trG5KuZgxTFYGrtQ~2EvCj680cuuKOBottau8onZGYLNC5cYQWN8Cbj0ZBCzqbQF9HSalBNw7MJ6ZflA0Wo2ju6o63nrQXwromkg8QUigJCP4JIRkM88QWCMzDbxpT6Wm4IKw3iMX~CjeQfO9CaeC6E66OsMvqw__',
-      audioUrl: SAMPLE_AUDIO_FILES.focus,
-      subtitle: 'IMPROVE by Alex'
+      imageUrl: 'https://s3-alpha-sig.figma.com/img/367d/4e8a/e6b3fd0e6d5f593a5837de3c93ba1bf3?Expires=1737936000&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=UZAZ1-1EZFqAw~A~u3uWaVeiwgn8yjulGUKYqOI8LfxcUc8yNEI33GKc53NEBQeawtynokhfrfiQlriF2lC72FsRpdCXDJ5t8JWJIfOThz~ykvhWTZWrJF2p9uE1NWaXVjUZyjgNaQUlmUeJftS4NWAavVZu15wNcgeewFcQeMPYb1cDNZDnRpHEMwVQuJItNL8Ih0HCHnB~4vFT-jS3QuGduzZODkLNH43e-O8Ekdq-S3~qKrFH8gFH~HECcZmJVyvOvKG8yhQ3c87i4jMZZ~SIhu1kSeUuMBVfZmWhlmB9-M4MkCHXPhmWzN1hcwPX6S0ur0w7wWRyr8IllM5yew__',
+      audioUrl: SAMPLE_AUDIO_FILES.unleash,
+      subtitle: 'UNLEASH by Alex'
     },
     {
       id: 3,
@@ -232,7 +231,6 @@ export default function TodayScreen({ navigation, route }) {
     </View>
   );
 }
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -449,3 +447,4 @@ const styles = StyleSheet.create({
     textAlign: 'right',
   },
 });
+

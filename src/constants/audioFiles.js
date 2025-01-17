@@ -1,5 +1,6 @@
-
 export const SAMPLE_AUDIO_FILES = {
-  unleash: 'https://assets.mixkit.co/music/preview/mixkit-meditation-gong-1817.mp3',
-  focus: 'https://assets.mixkit.co/music/preview/mixkit-meditation-bell-599.mp3'
+  unleash: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
+
+  focus: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3'
+
 };
