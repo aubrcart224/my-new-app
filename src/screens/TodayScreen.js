@@ -1,5 +1,4 @@
-// src/screens/TodayScreen.js
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -8,10 +7,27 @@ import {
   TouchableOpacity,
   Image,
 } from 'react-native';
-// If you want icons, install and use expo/vector-icons or react-native-vector-icons
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export default function TodayScreen() {
+export default function TodayScreen({ navigation }) {
+  const [notes, setNotes] = useState([]);
+
+  useEffect(() => {
+    loadNotes();
+  }, []);
+
+  const loadNotes = async () => {
+    try {
+      const savedNotes = await AsyncStorage.getItem('notes');
+      if (savedNotes) {
+        setNotes(JSON.parse(savedNotes));
+      }
+    } catch (error) {
+      console.error('Error loading notes:', error);
+    }
+  };
+
   return (
     <View style={styles.container}>
       {/** 
@@ -19,7 +35,6 @@ export default function TodayScreen() {
        */}
       <View style={styles.headerWrapper}>
         <Text style={styles.headerTitle}>MINDSET</Text>
-        {/* Menu icon (optional) */}
         <TouchableOpacity style={styles.menuIcon}>
           <Ionicons name="menu" size={24} color="#fff" />
         </TouchableOpacity>
@@ -29,11 +44,11 @@ export default function TodayScreen() {
        * 2) QUOTE SECTION
        */}
       <View style={styles.quoteContainer}>
-        <Text style={styles.quoteIcon}>“</Text>
+        <Text style={styles.quoteIcon}>"</Text>
         <Text style={styles.quoteText}>
-          If you don’t get what you want, you SUFFER...
+          If you don't get what you want, you SUFFER...
         </Text>
-        <Text style={styles.quoteIcon}>”</Text>
+        <Text style={styles.quoteIcon}>"</Text>
       </View>
 
       {/**
@@ -53,7 +68,6 @@ export default function TodayScreen() {
 
         {/** Horizontal Dates Row */}
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          {/* Sample date blocks */}
           <View style={styles.dateItem}>
             <Text style={styles.dateNumber}>08</Text>
             <Text style={styles.dateLabel}>SUN</Text>
@@ -137,34 +151,29 @@ export default function TodayScreen() {
 
         {/** Notes Grid */}
         <View style={styles.notesGrid}>
-          {/* “+” card for a new note */}
-          <View style={styles.noteCardAdd}>
+          {/* "+" card for a new note */}
+          <TouchableOpacity 
+            style={styles.noteCardAdd}
+            onPress={() => navigation.navigate('CreateNote')}
+          >
             <Ionicons name="add" size={75} color="#ccc" />
-          </View>
-          {/* Example Note 1 */}
-          <View style={styles.noteCard}>
-            <Text style={styles.noteTitle}>Note 1</Text>
-            <Text style={styles.noteBody}>
-              Consectetur adipiscing elit, sed do eiusmod...
-            </Text>
-            <Text style={styles.noteFooter}>1 week ago</Text>
-          </View>
-          {/* Example Note 2 */}
-          <View style={styles.noteCard}>
-            <Text style={styles.noteTitle}>Note 2</Text>
-            <Text style={styles.noteBody}>
-              Another short preview of a note...
-            </Text>
-            <Text style={styles.noteFooter}>3 days ago</Text>
-          </View>
-          {/* Example Note 3 */}
-          <View style={styles.noteCard}>
-            <Text style={styles.noteTitle}>Note 3</Text>
-            <Text style={styles.noteBody}>
-              Consectetur adipiscing elit, sed do eiusmod...
-            </Text>
-            <Text style={styles.noteFooter}>3 week ago</Text>
-          </View>
+          </TouchableOpacity>
+          {/* Existing Notes */}
+          {notes.slice(0, 3).map((note) => (
+            <TouchableOpacity
+              key={note.id}
+              style={styles.noteCard}
+              onPress={() => navigation.navigate('ViewNote', { note })}
+            >
+              <Text style={styles.noteTitle}>{note.title}</Text>
+              <Text style={styles.noteBody} numberOfLines={3}>
+                {note.content}
+              </Text>
+              <Text style={styles.noteFooter}>
+                {new Date(note.createdAt).toLocaleDateString()}
+              </Text>
+            </TouchableOpacity>
+          ))}
         </View>
       </ScrollView>
     </View>
@@ -365,14 +374,14 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     marginBottom: 10,
     fontSize: 14,
-    padding:4,
+    padding: 4,
   },
   noteBody: {
     fontSize: 12,
     color: '#666',
     marginBottom: 10,
     flex: 1,
-    padding:4,
+    padding: 4,
   },
   noteFooter: {
     fontSize: 10,
@@ -380,3 +389,4 @@ const styles = StyleSheet.create({
     textAlign: 'right',
   },
 });
+
