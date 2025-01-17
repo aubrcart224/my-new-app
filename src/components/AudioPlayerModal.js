@@ -1,14 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  Image,
-  TouchableOpacity,
-  Modal,
-  Dimensions,
-  Platform,
-} from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, Modal, ActivityIndicator, Platform } from 'react-native';
 import { Audio } from 'expo-av';
 import Slider from '@react-native-community/slider';
 import { Ionicons } from '@expo/vector-icons';
@@ -18,25 +9,60 @@ export default function AudioPlayerModal({ visible, onClose, lesson }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [position, setPosition] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     return sound
       ? () => {
+          console.log('Unloading Sound');
           sound.unloadAsync();
         }
       : undefined;
   }, [sound]);
 
   const loadAudio = async () => {
+    console.log('Loading Audio');
     try {
-      const { sound: audioSound } = await Audio.Sound.createAsync(
-        { uri: lesson.audioUrl },
-        { shouldPlay: false },
-        onPlaybackStatusUpdate
-      );
-      setSound(audioSound);
+      setIsLoading(true);
+      setError(null);
+      
+      if (Platform.OS === 'web') {
+        // Web-specific audio loading
+        const audio = new Audio(lesson.audioUrl);
+        audio.onloadedmetadata = () => {
+          setDuration(audio.duration * 1000);
+          setIsLoading(false);
+        };
+        audio.onerror = (e) => {
+          console.error('Audio loading error:', e);
+          setError('Failed to load audio');
+          setIsLoading(false);
+        };
+        setSound(audio);
+      } else {
+        // Native platforms
+        await Audio.setAudioModeAsync({
+          allowsRecordingIOS: false,
+          playsInSilentModeIOS: true,
+          staysActiveInBackground: true,
+          interruptionModeIOS: Audio.INTERRUPTION_MODE_IOS_DO_NOT_MIX,
+          interruptionModeAndroid: Audio.INTERRUPTION_MODE_ANDROID_DO_NOT_MIX,
+          shouldDuckAndroid: true,
+        });
+
+        const { sound: audioSound } = await Audio.Sound.createAsync(
+          { uri: lesson.audioUrl },
+          { shouldPlay: false },
+          onPlaybackStatusUpdate
+        );
+        setSound(audioSound);
+        setIsLoading(false);
+      }
     } catch (error) {
       console.error('Error loading audio:', error);
+      setError(`Failed to load audio: ${error.message}`);
+      setIsLoading(false);
     }
   };
 
@@ -44,6 +70,16 @@ export default function AudioPlayerModal({ visible, onClose, lesson }) {
     if (visible && lesson?.audioUrl) {
       loadAudio();
     }
+    return () => {
+      if (sound) {
+        if (Platform.OS === 'web') {
+          sound.pause();
+          sound.currentTime = 0;
+        } else {
+          sound.unloadAsync();
+        }
+      }
+    };
   }, [visible, lesson]);
 
   const onPlaybackStatusUpdate = (status) => {
@@ -51,36 +87,57 @@ export default function AudioPlayerModal({ visible, onClose, lesson }) {
       setPosition(status.positionMillis);
       setDuration(status.durationMillis);
       setIsPlaying(status.isPlaying);
+    } else if (status.error) {
+      console.error(`Encountered a fatal error during playback: ${status.error}`);
+      setError('An error occurred during playback');
     }
   };
 
   const playPause = async () => {
     if (sound) {
       if (isPlaying) {
-        await sound.pauseAsync();
+        console.log('Pausing Sound');
+        if (Platform.OS === 'web') {
+          sound.pause();
+        } else {
+          await sound.pauseAsync();
+        }
       } else {
-        await sound.playAsync();
+        console.log('Playing Sound');
+        if (Platform.OS === 'web') {
+          await sound.play();
+        } else {
+          await sound.playAsync();
+        }
       }
+      setIsPlaying(!isPlaying);
     }
   };
 
   const seek = async (value) => {
     if (sound) {
-      await sound.setPositionAsync(value);
+      console.log('Seeking to', value);
+      if (Platform.OS === 'web') {
+        sound.currentTime = value / 1000;
+      } else {
+        await sound.setPositionAsync(value);
+      }
     }
   };
 
   const skipForward = async () => {
     if (sound) {
+      console.log('Skipping forward');
       const newPosition = Math.min(position + 10000, duration);
-      await sound.setPositionAsync(newPosition);
+      seek(newPosition);
     }
   };
 
   const skipBackward = async () => {
     if (sound) {
+      console.log('Skipping backward');
       const newPosition = Math.max(position - 10000, 0);
-      await sound.setPositionAsync(newPosition);
+      seek(newPosition);
     }
   };
 
@@ -89,6 +146,18 @@ export default function AudioPlayerModal({ visible, onClose, lesson }) {
     const seconds = ((millis % 60000) / 1000).toFixed(0);
     return `${minutes}:${seconds.padStart(2, '0')}`;
   };
+
+  if (Platform.OS === 'web') {
+    useEffect(() => {
+      const updatePosition = () => {
+        if (sound && !isNaN(sound.currentTime)) {
+          setPosition(sound.currentTime * 1000);
+        }
+      };
+      const interval = setInterval(updatePosition, 1000);
+      return () => clearInterval(interval);
+    }, [sound]);
+  }
 
   return (
     <Modal
@@ -111,6 +180,19 @@ export default function AudioPlayerModal({ visible, onClose, lesson }) {
           <Text style={styles.title}>{lesson?.title}</Text>
           <Text style={styles.subtitle}>{lesson?.subtitle}</Text>
 
+          {isLoading && (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color="#000" />
+              <Text style={styles.loadingText}>Loading audio...</Text>
+            </View>
+          )}
+
+          {error && (
+            <View style={styles.errorContainer}>
+              <Text style={styles.errorText}>{error}</Text>
+            </View>
+          )}
+
           <View style={styles.progressContainer}>
             <Slider
               style={styles.progressBar}
@@ -123,7 +205,7 @@ export default function AudioPlayerModal({ visible, onClose, lesson }) {
               thumbTintColor="#000"
             />
             <View style={styles.timeContainer}>
-              <Text style={styles.timeText}>-{formatTime(duration - position)}</Text>
+              <Text style={styles.timeText}>{formatTime(position)}</Text>
               <Text style={styles.timeText}>{formatTime(duration)}</Text>
             </View>
           </View>
@@ -235,6 +317,23 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#666',
     marginBottom: 4,
+  },
+  loadingContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginVertical: 20,
+  },
+  loadingText: {
+    marginTop: 10,
+    color: '#666',
+  },
+  errorContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginVertical: 20,
+  },
+  errorText: {
+    color: '#ff4444',
   },
 });
 

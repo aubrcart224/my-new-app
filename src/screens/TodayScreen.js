@@ -12,6 +12,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import LessonCard from '../components/LessonCard';
 import AudioPlayerModal from '../components/AudioPlayerModal'
+import { SAMPLE_AUDIO_FILES } from '../constants/audioFiles';
 
 
 export default function TodayScreen({ navigation, route }) {
@@ -75,6 +76,7 @@ export default function TodayScreen({ navigation, route }) {
       type: 'Lesson',
       imageUrl: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-ek4i5DyiuJJSCH5ST8bfaDNYmhM2xg.png',
       audioUrl: 'YOUR_AUDIO_URL_HERE',
+      audioUrl: SAMPLE_AUDIO_FILES.unleash,
     },
     {
       id: 2,
@@ -82,7 +84,7 @@ export default function TodayScreen({ navigation, route }) {
       duration: '5 minutes',
       type: 'Lesson',
       imageUrl: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-cwVIxYX7Pb1dpp0rlQJjxBb4Zmx2zn.png',
-      audioUrl: 'YOUR_AUDIO_URL_HERE',
+      audioUrl: SAMPLE_AUDIO_FILES.focus,
     },
     {
       id: 3,
@@ -404,4 +406,3 @@ const styles = StyleSheet.create({
     textAlign: 'right',
   },
 });
-
