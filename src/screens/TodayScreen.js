@@ -301,10 +301,11 @@ const styles = StyleSheet.create({
   },
   icon: {
     marginLeft: 10,
-    marginBottom: 5, 
+    marginBottom: 5,
   },
+
   quoteToggle: {
-    alignItems: 'center',
+    alignItems: 'left',
     paddingVertical: 8,
   },
   dayTitleRow: {
