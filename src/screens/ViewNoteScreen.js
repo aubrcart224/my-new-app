@@ -5,11 +5,43 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
+  Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function ViewNoteScreen({ route, navigation }) {
   const { note } = route.params;
+
+  const deleteNote = async () => {
+    Alert.alert(
+      "Delete Note",
+      "Are you sure you want to delete this note?",
+      [
+        {
+          text: "Cancel",
+          style: "cancel"
+        },
+        { 
+          text: "Delete", 
+          onPress: async () => {
+            try {
+              const savedNotes = await AsyncStorage.getItem('notes');
+              if (savedNotes) {
+                let notes = JSON.parse(savedNotes);
+                notes = notes.filter(n => n.id !== note.id);
+                await AsyncStorage.setItem('notes', JSON.stringify(notes));
+                navigation.navigate('Today', { refresh: true });
+              }
+            } catch (error) {
+              console.error('Error deleting note:', error);
+            }
+          },
+          style: "destructive"
+        }
+      ]
+    );
+  };
 
   return (
     <View style={styles.container}>
@@ -20,12 +52,20 @@ export default function ViewNoteScreen({ route, navigation }) {
         >
           <Ionicons name="arrow-back" size={24} color="#000" />
         </TouchableOpacity>
-        <TouchableOpacity 
-          onPress={() => {/* Add edit functionality */}}
-          style={styles.editButton}
-        >
-          <Text style={styles.editButtonText}>Edit Note</Text>
-        </TouchableOpacity>
+        <View style={styles.headerButtons}>
+          <TouchableOpacity 
+            onPress={() => navigation.navigate('EditNote', { note })}
+            style={styles.editButton}
+          >
+            <Ionicons name="create-outline" size={24} color="#fff" />
+          </TouchableOpacity>
+          <TouchableOpacity 
+            onPress={deleteNote}
+            style={styles.deleteButton}
+          >
+            <Ionicons name="trash-outline" size={24} color="#fff" />
+          </TouchableOpacity>
+        </View>
       </View>
 
       <ScrollView style={styles.content}>
@@ -53,15 +93,19 @@ const styles = StyleSheet.create({
   backButton: {
     padding: 8,
   },
+  headerButtons: {
+    flexDirection: 'row',
+  },
   editButton: {
     backgroundColor: '#222',
-    paddingHorizontal: 20,
-    paddingVertical: 8,
+    padding: 8,
     borderRadius: 20,
+    marginRight: 8,
   },
-  editButtonText: {
-    color: '#fff',
-    fontWeight: '600',
+  deleteButton: {
+    backgroundColor: '#ff4444',
+    padding: 8,
+    borderRadius: 20,
   },
   content: {
     flex: 1,

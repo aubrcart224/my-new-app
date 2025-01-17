@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -9,15 +9,12 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect } from '@react-navigation/native';
 
-export default function TodayScreen({ navigation }) {
+export default function TodayScreen({ navigation, route }) {
   const [notes, setNotes] = useState([]);
 
-  useEffect(() => {
-    loadNotes();
-  }, []);
-
-  const loadNotes = async () => {
+  const loadNotes = useCallback(async () => {
     try {
       const savedNotes = await AsyncStorage.getItem('notes');
       if (savedNotes) {
@@ -26,13 +23,17 @@ export default function TodayScreen({ navigation }) {
     } catch (error) {
       console.error('Error loading notes:', error);
     }
-  };
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadNotes();
+    }, [loadNotes])
+  );
 
   return (
     <View style={styles.container}>
-      {/** 
-       * 1) HEADER
-       */}
+      {/* Header */}
       <View style={styles.headerWrapper}>
         <Text style={styles.headerTitle}>MINDSET</Text>
         <TouchableOpacity style={styles.menuIcon}>
@@ -40,9 +41,7 @@ export default function TodayScreen({ navigation }) {
         </TouchableOpacity>
       </View>
 
-      {/** 
-       * 2) QUOTE SECTION
-       */}
+      {/* Quote Section */}
       <View style={styles.quoteContainer}>
         <Text style={styles.quoteIcon}>"</Text>
         <Text style={styles.quoteText}>
@@ -51,14 +50,12 @@ export default function TodayScreen({ navigation }) {
         <Text style={styles.quoteIcon}>"</Text>
       </View>
 
-      {/**
-       * 3) MAIN CONTENT
-       */}
+      {/* Main Content */}
       <ScrollView
         style={styles.mainContent}
         contentContainerStyle={{ paddingBottom: 80 }}
       >
-        {/** Day Title + Skip button */}
+        {/* Day Title + Skip button */}
         <View style={styles.dayTitleRow}>
           <Text style={styles.dayTitle}>Day 15</Text>
           <TouchableOpacity>
@@ -66,7 +63,7 @@ export default function TodayScreen({ navigation }) {
           </TouchableOpacity>
         </View>
 
-        {/** Horizontal Dates Row */}
+        {/* Horizontal Dates Row */}
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           <View style={styles.dateItem}>
             <Text style={styles.dateNumber}>08</Text>
@@ -98,7 +95,7 @@ export default function TodayScreen({ navigation }) {
           </View>
         </ScrollView>
 
-        {/** Lesson / Audio Cards */}
+        {/* Lesson / Audio Cards */}
         <View style={styles.lessonCard}>
           <Image
             source={{ uri: 'https://via.placeholder.com/150' }}
@@ -141,7 +138,7 @@ export default function TodayScreen({ navigation }) {
           </TouchableOpacity>
         </View>
 
-        {/** Notes Section */}
+        {/* Notes Section */}
         <View style={styles.notesHeaderRow}>
           <Text style={styles.notesHeader}>Notes</Text>
           <TouchableOpacity>
@@ -149,7 +146,7 @@ export default function TodayScreen({ navigation }) {
           </TouchableOpacity>
         </View>
 
-        {/** Notes Grid */}
+        {/* Notes Grid */}
         <View style={styles.notesGrid}>
           {/* "+" card for a new note */}
           <TouchableOpacity 
@@ -180,19 +177,14 @@ export default function TodayScreen({ navigation }) {
   );
 }
 
-// ----------------------------------------------------------
-// Styles
-// ----------------------------------------------------------
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
   },
-
-  // 1) HEADER
   headerWrapper: {
     backgroundColor: '#222',
-    paddingTop: 50, // so text is below the status bar
+    paddingTop: 50,
     paddingBottom: 20,
     paddingHorizontal: 20,
     position: 'relative',
@@ -209,8 +201,6 @@ const styles = StyleSheet.create({
     right: 20,
     top: 50,
   },
-
-  // 2) QUOTE SECTION
   quoteContainer: {
     backgroundColor: '#222',
     paddingVertical: 20,
@@ -231,14 +221,10 @@ const styles = StyleSheet.create({
     lineHeight: 24,
     textAlign: 'left',
   },
-
-  // 3) MAIN CONTENT
   mainContent: {
     paddingHorizontal: 20,
     flex: 1,
   },
-
-  // Day Title + Skip
   dayTitleRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -253,8 +239,6 @@ const styles = StyleSheet.create({
   skipText: {
     color: '#555',
   },
-
-  // Horizontal Dates
   dateItem: {
     width: 60,
     height: 70,
@@ -290,11 +274,9 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#fff',
   },
-
-  // Lesson / Audio Card
   lessonCard: {
     flexDirection: 'row',
-    backgroundColor: '#e5e5e5', // shades of gray here
+    backgroundColor: '#e5e5e5',
     borderRadius: 10,
     padding: 10,
     marginTop: 10,
@@ -326,8 +308,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-
-  // Notes Section
   notesHeaderRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -342,7 +322,6 @@ const styles = StyleSheet.create({
   notesLink: {
     color: '#777',
   },
-
   notesGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
