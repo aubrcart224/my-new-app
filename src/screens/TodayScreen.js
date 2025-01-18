@@ -115,6 +115,8 @@ export default function TodayScreen({ navigation, route }) {
     }
   };
 
+  
+
   const handleLessonPress = (lesson) => {
     setSelectedLesson(lesson);
     setTimeout(() => {
