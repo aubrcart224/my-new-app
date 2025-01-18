@@ -40,13 +40,15 @@ export default function TodayScreen({ navigation, route }) {
     Animated.parallel([
       Animated.timing(rotateAnim, {
         toValue: isQuoteVisible ? 1 : 0,
-        duration: 300,
+        duration: 250,
         useNativeDriver: true,
       }),
-      Animated.timing(slideAnim, {
+      Animated.spring(slideAnim, {
         toValue: isQuoteVisible ? 1 : 0,
-        duration: 300,
         useNativeDriver: true,
+        damping: 20,
+        stiffness: 200,
+        mass: 0.5,
       })
     ]).start();
   }, [isQuoteVisible]);
@@ -223,11 +225,27 @@ export default function TodayScreen({ navigation, route }) {
         <Animated.View style={[
           styles.quoteWrapper,
           {
-            height: slideAnim.interpolate({
-              inputRange: [0, 1],
-              outputRange: [0, 100], // Adjust this value based on your quote height
+            opacity: slideAnim.interpolate({
+              inputRange: [0, 0.5, 1],
+              outputRange: [0, 0.5, 1],
+              extrapolate: 'clamp',
             }),
-            opacity: rotateAnim,
+            transform: [
+              {
+                translateY: slideAnim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [-50, 0],
+                  extrapolate: 'clamp',
+                })
+              },
+              {
+                scaleY: slideAnim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [0, 1],
+                  extrapolate: 'clamp',
+                })
+              }
+            ]
           }
         ]}>
           <View style={styles.quoteContainer}>
@@ -373,12 +391,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#222',
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
-    
+    overflow: 'hidden',
   },
   headerWrapper: {
     paddingTop: 32,
-    paddingBottom: 20,
-    marginTop:20,
+    paddingBottom: 15,
+    marginTop: 20,
   },
   headerContent: {
     flexDirection: 'row',
@@ -400,6 +418,7 @@ const styles = StyleSheet.create({
   quoteContainer: {
     paddingVertical: 10,
     paddingHorizontal: 20,
+    position: 'relative',
   },
   quoteIcon: {
     color: '#fff',
@@ -420,6 +439,9 @@ const styles = StyleSheet.create({
 
   quoteWrapper: {
     overflow: 'hidden',
+    position: 'relative',
+    height: 100,
+    transform: [{ translateY: 0 }],
   },
   dayTitleRow: {
     flexDirection: 'row',
