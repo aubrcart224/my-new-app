@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
+  SafeAreaView,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
@@ -42,51 +43,53 @@ export default function EditNoteScreen({ route, navigation }) {
   };
 
   return (
-    <KeyboardAvoidingView 
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={styles.container}
-    >
-      <View style={styles.header}>
-        <TouchableOpacity 
-          onPress={() => navigation.goBack()}
-          style={styles.closeButton}
-        >
-          <Ionicons name="close" size={24} color="#000" />
-        </TouchableOpacity>
-        <TouchableOpacity 
-          onPress={saveNote}
-          style={styles.saveButton}
-        >
-          <Text style={styles.saveButtonText}>Save</Text>
-        </TouchableOpacity>
-      </View>
+    <SafeAreaView style={styles.container}>
+      <KeyboardAvoidingView 
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.keyboardView}
+      >
+        <View style={styles.header}>
+          <TouchableOpacity 
+            onPress={() => navigation.goBack()}
+            style={styles.closeButton}
+          >
+            <Ionicons name="close" size={24} color="#000" />
+          </TouchableOpacity>
+          <TouchableOpacity 
+            onPress={saveNote}
+            style={styles.saveButton}
+          >
+            <Text style={styles.saveButtonText}>Save</Text>
+          </TouchableOpacity>
+        </View>
 
-      <View style={styles.content}>
-        <TextInput
-          style={styles.titleInput}
-          placeholder="Type the title here..."
-          value={title}
-          onChangeText={setTitle}
-          placeholderTextColor="#999"
-        />
-        <TextInput
-          style={styles.subtitleInput}
-          placeholder="Type your subtitle here..."
-          value={subtitle}
-          onChangeText={setSubtitle}
-          placeholderTextColor="#999"
-        />
-        <TextInput
-          style={styles.contentInput}
-          placeholder="What do you want to write in your notes?"
-          value={content}
-          onChangeText={setContent}
-          multiline
-          textAlignVertical="top"
-          placeholderTextColor="#999"
-        />
-      </View>
-    </KeyboardAvoidingView>
+        <View style={styles.content}>
+          <TextInput
+            style={styles.titleInput}
+            placeholder="Type the title here..."
+            value={title}
+            onChangeText={setTitle}
+            placeholderTextColor="#999"
+          />
+          <TextInput
+            style={styles.subtitleInput}
+            placeholder="Type your subtitle here..."
+            value={subtitle}
+            onChangeText={setSubtitle}
+            placeholderTextColor="#999"
+          />
+          <TextInput
+            style={styles.contentInput}
+            placeholder="What do you want to write in your notes?"
+            value={content}
+            onChangeText={setContent}
+            multiline
+            textAlignVertical="top"
+            placeholderTextColor="#999"
+          />
+        </View>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 
@@ -95,22 +98,28 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
   },
+  keyboardView: {
+    flex: 1,
+  },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     padding: 16,
+    paddingTop: 48,
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
   },
   closeButton: {
     padding: 8,
+    marginTop: 40,
   },
   saveButton: {
     backgroundColor: '#222',
     paddingHorizontal: 20,
     paddingVertical: 8,
     borderRadius: 20,
+    marginTop: 40,
   },
   saveButtonText: {
     color: '#fff',

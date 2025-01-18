@@ -90,13 +90,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
-    paddingTop: 20,    // adjust for device notch if necessary
+    paddingTop: 48,    // adjust for device notch if necessary
     paddingBottom: 10,
     borderBottomWidth: 2,
     borderBottomRightRadius: 24,
     borderBottomLeftRadius:24,
     borderBottomColor: '#eee',
     backgroundColor: '#dadada',
+    
   },
   headerTitle: {
     color: '#fff',
