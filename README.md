@@ -24,7 +24,9 @@ For the most part this was a learning experince overall dev time well under 10 h
 my-new-app/
 ├── src/
 │ ├── components/
+
 │ │ ├── AudioPlayerModal.js
+
 │ │ ├── LessonCard.js
 │ │ └── SwipeableLessonCard.js
 │ ├── screens/
