@@ -448,8 +448,8 @@ const styles = StyleSheet.create({
     top: 4,
   },
   quoteIconRight: {
-    right: 30,
-    bottom: 4,
+    left: 30,
+    bottom: -4,
   },
   quoteText: {
     color: '#fff',
