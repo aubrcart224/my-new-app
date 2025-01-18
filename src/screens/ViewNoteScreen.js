@@ -38,7 +38,7 @@ export default function ViewNoteScreen({ route, navigation }) {
           onPress={() => navigation.navigate('Today')}
           style={styles.headerLeftIcon}
         >
-          <Ionicons name="arrow-back" size={24} color="#000" />
+          <Ionicons name="arrow-back" size={24} color="#fff" />
         </TouchableOpacity>
 
         <Text style={styles.headerTitle}>MINDSET</Text>
@@ -47,7 +47,7 @@ export default function ViewNoteScreen({ route, navigation }) {
           onPress={() => Alert.alert("Star", "Star icon pressed!")}
           style={styles.headerRightIcon}
         >
-          <Ionicons name="menu" size={24} color="#000" />
+          <Ionicons name="menu" size={24} color="#fff" />
         </TouchableOpacity>
       </View>
 
@@ -91,12 +91,13 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingTop: 48,    // adjust for device notch if necessary
-    paddingBottom: 10,
+    paddingBottom: 14,
     borderBottomWidth: 2,
-    borderBottomRightRadius: 24,
-    borderBottomLeftRadius:24,
-    borderBottomColor: '#eee',
-    backgroundColor: '#dadada',
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+    //borderBottomColor: '#eee',
+    backgroundColor: '#222',
+    
     
   },
   headerTitle: {
@@ -119,7 +120,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 24,
     fontWeight: '700',
-    color: '#000',
+    color: '#fff',
   },
 
   /* CONTENT */

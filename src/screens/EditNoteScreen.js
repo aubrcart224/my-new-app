@@ -42,6 +42,15 @@ export default function EditNoteScreen({ route, navigation }) {
     }
   };
 
+  navigation.setOptions({
+    headerRight: () => (
+      <TouchableOpacity onPress={saveNote}>
+        <Text style={styles.saveButtonText}>Save</Text>
+      </TouchableOpacity>
+    ),
+    headerTintColor: 'white',
+  });
+
   return (
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView 
