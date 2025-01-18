@@ -107,11 +107,18 @@ export default function TodayScreen({ navigation, route }) {
 
   const handleLessonComplete = async (lessonId) => {
     try {
-      const newCompletedLessons = [...completedLessons, lessonId];
+      let newCompletedLessons;
+      if (completedLessons.includes(lessonId)) {
+        // If lesson is already completed, remove it
+        newCompletedLessons = completedLessons.filter(id => id !== lessonId);
+      } else {
+        // If lesson is not completed, add it
+        newCompletedLessons = [...completedLessons, lessonId];
+      }
       setCompletedLessons(newCompletedLessons);
       await AsyncStorage.setItem('completedLessons', JSON.stringify(newCompletedLessons));
     } catch (error) {
-      console.error('Error saving completed lesson:', error);
+      console.error('Error toggling lesson completion:', error);
     }
   };
 

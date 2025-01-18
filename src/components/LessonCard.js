@@ -14,6 +14,12 @@ export default function LessonCard({ lesson, onPress, onComplete, isLocked, isCo
   const pan = useRef(new Animated.ValueXY()).current;
   const [showCheck, setShowCheck] = useState(false);
 
+  const handleCheckboxPress = () => {
+    if (!isLocked) {
+      onComplete(lesson.id);
+    }
+  };
+
   const panResponder = useRef(
     PanResponder.create({
       onMoveShouldSetPanResponder: () => !isLocked && !isCompleted,
@@ -52,31 +58,59 @@ export default function LessonCard({ lesson, onPress, onComplete, isLocked, isCo
 
   return (
     <View style={styles.container}>
-      {isCompleted && (
-        <View style={styles.completedIndicator}>
-          <Ionicons name="checkmark-circle" size={24} color="#4CAF50" />
-        </View>
-      )}
       <Animated.View
-        style={[styles.card, cardStyle, isLocked && styles.lockedCard]}
+        style={[
+          styles.card, 
+          cardStyle, 
+          isLocked && styles.lockedCard,
+          isCompleted && styles.completedCard
+        ]}
         {...(isLocked ? {} : panResponder.panHandlers)}
       >
+        <TouchableOpacity 
+          style={styles.checkboxContainer}
+          onPress={handleCheckboxPress}
+          disabled={isLocked}
+        >
+          <View style={[
+            styles.checkbox,
+            isCompleted && styles.checkboxCompleted,
+            isLocked && styles.checkboxLocked
+          ]}>
+            {isCompleted && (
+              <Ionicons name="checkmark" size={16} color="#fff" />
+            )}
+          </View>
+        </TouchableOpacity>
+
         <Image source={{ uri: lesson.imageUrl }} style={styles.image} />
         <View style={styles.details}>
-          <Text style={[styles.title, isLocked && styles.lockedText]}>
+          <Text style={[
+            styles.title, 
+            isLocked && styles.lockedText,
+            isCompleted && styles.completedText
+          ]}>
             {lesson.title}
           </Text>
-          <Text style={[styles.subtitle, isLocked && styles.lockedText]}>
+          <Text style={[
+            styles.subtitle, 
+            isLocked && styles.lockedText,
+            isCompleted && styles.completedSubText
+          ]}>
             {lesson.duration} • {lesson.type}
           </Text>
         </View>
         <TouchableOpacity
-          style={[styles.playButton, isLocked && styles.lockedButton]}
+          style={[
+            styles.playButton, 
+            isLocked && styles.lockedButton,
+            isCompleted && styles.completedButton
+          ]}
           onPress={() => !isLocked && onPress(lesson)}
           disabled={isLocked}
         >
           <Ionicons
-            name={isCompleted ? "checkmark" : "play"}
+            name={isCompleted ? "reload" : "play"}
             size={20}
             color={isLocked ? "#999" : "#fff"}
           />
@@ -95,7 +129,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     backgroundColor: '#fff',
     borderRadius: 10,
-    padding: 10,
+    padding: 12,
     alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: {
@@ -147,5 +181,38 @@ const styles = StyleSheet.create({
     top: '50%',
     marginTop: -12,
     zIndex: 1,
+  },
+  completedCard: {
+    backgroundColor: '#f8f8f8',
+  },
+  completedText: {
+    color: '#333',
+  },
+  completedSubText: {
+    color: '#666',
+  },
+  completedButton: {
+    backgroundColor: '#444',
+  },
+  checkboxContainer: {
+    marginRight: 10,
+    justifyContent: 'center',
+  },
+  checkbox: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    borderWidth: 2,
+    borderColor: '#ddd',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  checkboxCompleted: {
+    backgroundColor: '#4CAF50',
+    borderColor: '#4CAF50',
+  },
+  checkboxLocked: {
+    borderColor: '#ccc',
+    backgroundColor: '#eee',
   },
 });
