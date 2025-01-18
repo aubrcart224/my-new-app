@@ -26,7 +26,8 @@
     "react-native-reanimated": "^3.16.7",
     "react-native-safe-area-context": "^5.1.0",
     "react-native-screens": "^4.5.0",
-    "react-native-web": "~0.19.13"
+    "react-native-web": "~0.19.13",
+    "expo-linear-gradient": "~14.0.2"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"
