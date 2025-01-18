@@ -12,25 +12,17 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function ViewNoteScreen({ route, navigation }) {
   const { note } = route.params;
-  console.log('Viewing note:', note);
-  console.log('Note ID:', note.id);
 
   const deleteNote = async () => {
-    console.log('Delete button pressed');
     try {
-      console.log('Attempting to delete note with id:', note.id);
       const savedNotes = await AsyncStorage.getItem('notes');
-      console.log('Saved notes retrieved:', savedNotes);
       if (savedNotes) {
         let notes = JSON.parse(savedNotes);
-        console.log('Parsed notes:', notes);
         notes = notes.filter(n => n.id !== note.id);
-        console.log('Notes after deletion:', notes);
         await AsyncStorage.setItem('notes', JSON.stringify(notes));
-        console.log('Notes successfully updated in AsyncStorage');
         navigation.navigate('Today', { refresh: true });
       } else {
-        console.log('No notes found in AsyncStorage');
+        Alert.alert("No notes found", "There were no notes to delete.");
       }
     } catch (error) {
       console.error('Error deleting note:', error);
@@ -40,102 +32,145 @@ export default function ViewNoteScreen({ route, navigation }) {
 
   return (
     <View style={styles.container}>
+      {/* HEADER */}
       <View style={styles.header}>
-        <TouchableOpacity 
+        <TouchableOpacity
           onPress={() => navigation.navigate('Today')}
-          style={styles.backButton}
+          style={styles.headerLeftIcon}
         >
           <Ionicons name="arrow-back" size={24} color="#000" />
         </TouchableOpacity>
-        <View style={styles.headerButtons}>
-          <TouchableOpacity 
-            onPress={() => navigation.navigate('EditNote', { note })}
-            style={styles.editButton}
-          >
-            <Ionicons name="create-outline" size={24} color="#fff" />
-          </TouchableOpacity>
-          <TouchableOpacity 
-            onPress={deleteNote}
-            style={styles.deleteButton}
-          >
-            <Ionicons name="trash-outline" size={24} color="#fff" />
-          </TouchableOpacity>
-        </View>
+
+        <Text style={styles.headerTitle}>MINDSET</Text>
+
+        <TouchableOpacity
+          onPress={() => Alert.alert("Star", "Star icon pressed!")}
+          style={styles.headerRightIcon}
+        >
+          <Ionicons name="menu" size={24} color="#000" />
+        </TouchableOpacity>
       </View>
 
+      {/* CONTENT */}
       <ScrollView style={styles.content}>
         <Text style={styles.title}>{note.title}</Text>
         {note.subtitle && <Text style={styles.subtitle}>{note.subtitle}</Text>}
         <Text style={styles.noteContent}>{note.content}</Text>
       </ScrollView>
+
+      {/* FOOTER */}
+      <View style={styles.footer}>
+        <TouchableOpacity
+          style={styles.editNoteButton}
+          onPress={() => navigation.navigate('EditNote', { note })}
+        >
+          <Text style={styles.editNoteText}>Edit Note</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.deleteButton}
+          onPress={deleteNote}
+        >
+          <Ionicons name="trash-outline" size={24} color="#fff" />
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
 
+/** STYLES */
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
   },
+  /* HEADER */
   header: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 16,
-    borderBottomWidth: 1,
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingTop: 20,    // adjust for device notch if necessary
+    paddingBottom: 10,
+    borderBottomWidth: 2,
+    borderBottomRightRadius: 24,
+    borderBottomLeftRadius:24,
     borderBottomColor: '#eee',
+    backgroundColor: '#dadada',
   },
-  backButton: {
+  headerTitle: {
+    color: '#fff',
+    fontSize: 34,
+    fontWeight: '900',
+    textAlign: 'center',
+  },
+  menuIcon: {
+    position: 'absolute',
+    right: 20,
+    top: 50,
+  },
+  headerLeftIcon: {
     padding: 8,
   },
-  headerButtons: {
-    flexDirection: 'row',
-  },
-  editButton: {
-    backgroundColor: '#222',
+  headerRightIcon: {
     padding: 8,
-    borderRadius: 20,
-    marginRight: 8,
   },
-  deleteButton: {
-    backgroundColor: '#ff4444',
-    padding: 8,
-    borderRadius: 20,
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#000',
   },
+
+  /* CONTENT */
   content: {
     flex: 1,
-    padding: 16,
-    borderColor: '#dadada',
-    padding: 8,
-    borderRadius: 4,
-    borderWidth:1,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
   },
   title: {
     fontSize: 24,
-    fontWeight: '600',
-    marginBottom: 8,
-    borderColor: '#dadada',
-    padding: 8,
-    borderRadius: 4,
-    borderWidth:1,
+    fontWeight: '700',
+    marginBottom: 6,
+    color: '#000',
   },
   subtitle: {
-    fontSize: 18,
+    fontSize: 16,
     color: '#666',
-    marginBottom: 16,
-    borderColor: '#dadada',
-    padding: 8,
-    borderRadius: 4,
-    borderWidth:1,
+    marginBottom: 14,
+    fontWeight: '600',
   },
   noteContent: {
     fontSize: 16,
     lineHeight: 24,
     color: '#333',
-    borderColor: '#dadada',
-    padding: 8,
-    borderRadius: 4,
-    borderWidth:1,
+  },
+
+  /* FOOTER */
+  footer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderTopWidth: 2,
+    borderTopColor: '#eee',
+  },
+  editNoteButton: {
+    backgroundColor: '#dadada',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 18,
+  },
+  editNoteText: {
+    color: '#000',
+    fontSize: 16,
+    
+  },
+  deleteButton: {
+    backgroundColor: '#ff4444',
+    padding: 14,
+    borderRadius: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
-

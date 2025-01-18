@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -6,6 +6,7 @@ import {
   ScrollView,
   TouchableOpacity,
   Image,
+  Animated,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -21,6 +22,21 @@ export default function TodayScreen({ navigation, route }) {
   const [selectedLesson, setSelectedLesson] = useState(null);
   const [showAudioPlayer, setShowAudioPlayer] = useState(false);
   const [isQuoteVisible, setIsQuoteVisible] = useState(true);
+
+  const rotateAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.timing(rotateAnim, {
+      toValue: isQuoteVisible ? 1 : 0,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
+  }, [isQuoteVisible]);
+
+  const rotate = rotateAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '180deg'],
+  });
 
   const loadNotes = useCallback(async () => {
     try {
@@ -113,34 +129,47 @@ export default function TodayScreen({ navigation, route }) {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.headerWrapper}>
-        <Text style={styles.headerTitle}>MINDSET</Text>
-        <TouchableOpacity style={styles.menuIcon}>
-          <Ionicons name="menu" size={24} color="#fff" />
-        </TouchableOpacity>
+        <View style={styles.headerContent}>
+          <TouchableOpacity 
+            style={styles.quoteToggle}
+            onPress={() => setIsQuoteVisible(!isQuoteVisible)}
+          >
+            <Animated.View style={{ transform: [{ rotate }] }}>
+              <Ionicons 
+                name="chevron-down"
+                size={24} 
+                color="#fff" 
+              />
+            </Animated.View>
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>MINDSET</Text>
+          <TouchableOpacity style={styles.menuIcon}>
+            <Ionicons name="menu" size={24} color="#fff" />
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Quote Section */}
       <View style={styles.quoteWrapper}>
-        <TouchableOpacity 
-          style={styles.quoteToggle}
-          onPress={() => setIsQuoteVisible(!isQuoteVisible)}
-        >
-        <Ionicons 
-          name={isQuoteVisible ? "chevron-up" : "chevron-down"} 
-          size={24} 
-          color="#fff" 
-          style={styles.icon} 
-        />
-        </TouchableOpacity>
-        {isQuoteVisible && (
-          <View style={styles.quoteContainer}>
-            <Text style={styles.quoteIcon}>"</Text>
-            <Text style={styles.quoteText}>
-              If you don't get what you want, you SUFFER...
-            </Text>
-          <Text style={styles.quoteIcon}>"</Text>
-          </View>
-        )}
+        <Animated.View style={{
+          opacity: rotateAnim,
+          transform: [{
+            translateY: rotateAnim.interpolate({
+              inputRange: [0, 1],
+              outputRange: [-20, 0],
+            })
+          }]
+        }}>
+          {isQuoteVisible && (
+            <View style={styles.quoteContainer}>
+              <Text style={styles.quoteIcon}>"</Text>
+              <Text style={styles.quoteText}>
+                If you don't get what you want, you SUFFER...
+              </Text>
+              <Text style={styles.quoteIcon}>"</Text>
+            </View>
+          )}
+        </Animated.View>
       </View>
 
       {/* Main Content */}
@@ -252,24 +281,27 @@ const styles = StyleSheet.create({
     backgroundColor: '#222',
     paddingTop: 32,
     paddingBottom: 20,
-    paddingHorizontal: 20,
-    position: 'relative',
+  },
+  headerContent: {
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
   },
   headerTitle: {
     color: '#fff',
     fontSize: 24,
     fontWeight: '700',
-    textAlign: 'center',
   },
   menuIcon: {
-    position: 'absolute',
-    right: 20,
-    top: 50,
+    width: 24,
+  },
+  quoteToggle: {
+    width: 24,
   },
   quoteContainer: {
     backgroundColor: '#222',
-    paddingVertical: 20,
+    paddingVertical: 0,
     paddingHorizontal: 20,
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
@@ -298,15 +330,6 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 20,
     marginBottom: 10,
     overflow: 'hidden',
-  },
-  icon: {
-    marginLeft: 10,
-    marginBottom: 5,
-  },
-
-  quoteToggle: {
-    alignItems: 'left',
-    paddingVertical: 8,
   },
   dayTitleRow: {
     flexDirection: 'row',
