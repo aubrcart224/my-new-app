@@ -8,6 +8,7 @@ import {
   Image,
   Animated,
   Dimensions,
+  LayoutAnimation,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -37,29 +38,12 @@ export default function TodayScreen({ navigation, route }) {
   const [lessons, setLessons] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const rotateAnim = useRef(new Animated.Value(0)).current;
-  const slideAnim = useRef(new Animated.Value(1)).current;
   const scrollViewRef = useRef(null);
 
-  useEffect(() => {
-    Animated.parallel([
-      Animated.timing(rotateAnim, {
-        toValue: isQuoteVisible ? 1 : 0,
-        duration: 250,
-        useNativeDriver: true,
-      }),
-      Animated.timing(slideAnim, {
-        toValue: isQuoteVisible ? 1 : 0,
-        duration: 300,
-        useNativeDriver: true,
-      }),
-    ]).start();
-  }, [isQuoteVisible]);
-
-  const rotate = rotateAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['0deg', '180deg'],
-  });
+  const toggleQuote = () => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setIsQuoteVisible(!isQuoteVisible);
+  };
 
   const loadNotes = useCallback(async () => {
     try {
@@ -263,15 +247,14 @@ export default function TodayScreen({ navigation, route }) {
           <View style={styles.headerContent}>
             <TouchableOpacity 
               style={styles.quoteToggle}
-              onPress={() => setIsQuoteVisible(!isQuoteVisible)}
+              onPress={toggleQuote}
             >
-              <Animated.View style={{ transform: [{ rotate }] }}>
-                <Ionicons 
-                  name="chevron-down"
-                  size={24} 
-                  color="#fff" 
-                />
-              </Animated.View>
+              <Ionicons 
+                name="chevron-down"
+                size={24} 
+                color="#fff" 
+                style={{ transform: [{ rotate: isQuoteVisible ? '180deg' : '0deg' }] }}
+              />
             </TouchableOpacity>
             <Text style={styles.headerTitle}>MINDSET</Text>
             <TouchableOpacity style={styles.menuIcon}>
@@ -280,38 +263,8 @@ export default function TodayScreen({ navigation, route }) {
           </View>
         </View>
         
-        {/* Quote section with animated background */}
-        <View style={styles.quoteSection}>
-          <Animated.View style={[
-            styles.quoteBg,
-            {
-              transform: [{
-                scaleY: slideAnim.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [0, 1]
-                })
-              }],
-              opacity: slideAnim
-            }
-          ]} />
-          <Animated.View 
-            style={[
-              styles.quoteWrapper,
-              {
-                opacity: slideAnim,
-                transform: [{
-                  translateY: slideAnim.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [-50, 0],
-                  })
-                }]
-              }
-            ]}
-            onLayout={(event) => {
-              const {height} = event.nativeEvent.layout;
-              setQuoteHeight(height);
-            }}
-          >
+        {isQuoteVisible && (
+          <View style={styles.quoteSection}>
             <View style={styles.quoteContainer}>
               <Text style={[styles.quoteIcon, styles.quoteIconLeft]}>"</Text>
               <Text style={styles.quoteText}>
@@ -319,8 +272,8 @@ export default function TodayScreen({ navigation, route }) {
               </Text>
               <Text style={[styles.quoteIcon, styles.quoteIconRight]}>"</Text>
             </View>
-          </Animated.View>
-        </View>
+          </View>
+        )}
       </View>
       {/* Main Content */}
       <ScrollView
@@ -456,7 +409,6 @@ const styles = StyleSheet.create({
     paddingTop: 30,
     paddingBottom: 5,
     overflow: 'hidden',
-    height: 105,
   },
   headerWrapper: {
     height: 74,
