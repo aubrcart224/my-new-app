@@ -42,6 +42,12 @@ export default function AudioPlayerModal({ visible, onClose, lesson }) {
     };
   }, [sound]);
 
+  const isSupportedFormat = (url) => {
+    const supportedExtensions = ['mp3', 'wav', 'ogg'];
+    const extension = url.split('.').pop().toLowerCase();
+    return supportedExtensions.includes(extension);
+  };
+
   const loadAudio = async () => {
     const audioUrl = lesson.audioUrl;
 
@@ -59,26 +65,34 @@ export default function AudioPlayerModal({ visible, onClose, lesson }) {
       setError(null);
 
       if (Platform.OS === 'web') {
-        const audio = new window.Audio();
+        const audio = new Audio(audioUrl);
+        
+        audio.onloadedmetadata = () => {
+          console.log('Audio metadata loaded');
+          setDuration(audio.duration * 1000);
+        };
+
+        audio.oncanplaythrough = () => {
+          console.log('Audio can play through');
+          setIsLoading(false);
+          setSound(audio);
+        };
         
         audio.onerror = (e) => {
           console.error('Audio loading error:', e);
-          setError(`Failed to load audio: ${e.target.error.message}`);
-          setIsLoading(false);
-        };
-        
-        audio.oncanplaythrough = () => {
-          console.log('Audio can play through');
-          setDuration(audio.duration * 1000);
+          setError(`Failed to load audio: ${e.target.error?.message || 'Unknown error'}`);
           setIsLoading(false);
         };
         
         audio.crossOrigin = "anonymous";
-        audio.src = audioUrl;
-        
         audioRef.current = audio;
-        setSound(audio);
       } else {
+        await Audio.setAudioModeAsync({
+          playsInSilentModeIOS: true,
+          staysActiveInBackground: true,
+          shouldDuckAndroid: true,
+        });
+
         const { sound: audioSound } = await Audio.Sound.createAsync(
           { uri: audioUrl },
           { shouldPlay: false },
@@ -124,20 +138,14 @@ export default function AudioPlayerModal({ visible, onClose, lesson }) {
     try {
       if (Platform.OS === 'web') {
         if (!audioRef.current) {
-          setError('Audio is not loaded yet.');
+          setError('Audio is not loaded yet. Please wait.');
           return;
         }
 
         if (isPlaying) {
-          await audioRef.current.pause();
+          audioRef.current.pause();
         } else {
-          if (audioRef.current.readyState >= 2) {
-            await audioRef.current.play();
-          } else {
-            console.log('Audio not ready to play');
-            setError('Audio not ready to play. Please wait or try reloading.');
-            return;
-          }
+          await audioRef.current.play();
         }
         setIsPlaying(!isPlaying);
       } else {
@@ -148,6 +156,8 @@ export default function AudioPlayerModal({ visible, onClose, lesson }) {
             await sound.playAsync();
           }
           setIsPlaying(!isPlaying);
+        } else {
+          setError('Audio is not loaded yet. Please wait.');
         }
       }
     } catch (error) {
@@ -157,10 +167,16 @@ export default function AudioPlayerModal({ visible, onClose, lesson }) {
   };
 
   const seek = async (value) => {
-    if (Platform.OS === 'web' && audioRef.current) {
-      audioRef.current.currentTime = value / 1000;
-    } else if (sound) {
-      await sound.setPositionAsync(value);
+    try {
+      if (Platform.OS === 'web' && audioRef.current) {
+        audioRef.current.currentTime = value / 1000;
+        setPosition(value);
+      } else if (sound) {
+        await sound.setPositionAsync(value);
+      }
+    } catch (error) {
+      console.error('Error in seek:', error);
+      setError(`Seek error: ${error.message}`);
     }
   };
 
@@ -182,11 +198,13 @@ export default function AudioPlayerModal({ visible, onClose, lesson }) {
 
   useEffect(() => {
     if (Platform.OS === 'web' && audioRef.current) {
-      const updatePosition = () => {
+      const updateProgress = () => {
         setPosition(audioRef.current.currentTime * 1000);
       };
-      audioRef.current.addEventListener('timeupdate', updatePosition);
-      return () => audioRef.current.removeEventListener('timeupdate', updatePosition);
+      audioRef.current.addEventListener('timeupdate', updateProgress);
+      return () => {
+        audioRef.current.removeEventListener('timeupdate', updateProgress);
+      };
     }
   }, [audioRef.current]);
 
