@@ -105,21 +105,37 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     padding: 16,
+    borderColor: '#dadada',
+    padding: 8,
+    borderRadius: 4,
+    borderWidth:1,
   },
   title: {
     fontSize: 24,
     fontWeight: '600',
     marginBottom: 8,
+    borderColor: '#dadada',
+    padding: 8,
+    borderRadius: 4,
+    borderWidth:1,
   },
   subtitle: {
     fontSize: 18,
     color: '#666',
     marginBottom: 16,
+    borderColor: '#dadada',
+    padding: 8,
+    borderRadius: 4,
+    borderWidth:1,
   },
   noteContent: {
     fontSize: 16,
     lineHeight: 24,
     color: '#333',
+    borderColor: '#dadada',
+    padding: 8,
+    borderRadius: 4,
+    borderWidth:1,
   },
 });
 
