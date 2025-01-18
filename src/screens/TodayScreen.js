@@ -31,6 +31,7 @@ export default function TodayScreen({ navigation, route }) {
   const [showAudioPlayer, setShowAudioPlayer] = useState(false);
   const [isQuoteVisible, setIsQuoteVisible] = useState(true);
   const [selectedDate, setSelectedDate] = useState(TODAY);
+  const [quoteHeight, setQuoteHeight] = useState(0);
 
   const rotateAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(1)).current;
@@ -196,7 +197,6 @@ export default function TodayScreen({ navigation, route }) {
   return (
     <View style={styles.container}>
       <View style={styles.headerContainer}>
-        {/* Header */}
         <View style={styles.headerWrapper}>
           <View style={styles.headerContent}>
             <TouchableOpacity 
@@ -217,30 +217,48 @@ export default function TodayScreen({ navigation, route }) {
             </TouchableOpacity>
           </View>
         </View>
-        {/* Quote Section */}
-        <Animated.View style={[
-          {
-            overflow: 'hidden',
-            position: 'relative',
-            backgroundColor: '#222',
-            paddingVertical: 10,
-            opacity: slideAnim,
-            transform: [{
-              translateY: slideAnim.interpolate({
-                inputRange: [0, 1],
-                outputRange: [-100, 0],
-              })
-            }]
-          }
-        ]}>
-          <View style={styles.quoteContainer}>
-            <Text style={[styles.quoteIcon, styles.quoteIconLeft]}>"</Text>
-            <Text style={styles.quoteText}>
-              If you don't get what you want, you SUFFER...
-            </Text>
-            <Text style={[styles.quoteIcon, styles.quoteIconRight]}>"</Text>
-          </View>
-        </Animated.View>
+        
+        {/* Quote section with animated background */}
+        <View style={styles.quoteSection}>
+          <Animated.View style={[
+            styles.quoteBg,
+            {
+              transform: [{
+                scaleY: slideAnim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [0, 1]
+                })
+              }],
+              opacity: slideAnim
+            }
+          ]} />
+          <Animated.View 
+            style={[
+              styles.quoteWrapper,
+              {
+                opacity: slideAnim,
+                transform: [{
+                  translateY: slideAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [-50, 0],
+                  })
+                }]
+              }
+            ]}
+            onLayout={(event) => {
+              const {height} = event.nativeEvent.layout;
+              setQuoteHeight(height);
+            }}
+          >
+            <View style={styles.quoteContainer}>
+              <Text style={[styles.quoteIcon, styles.quoteIconLeft]}>"</Text>
+              <Text style={styles.quoteText}>
+                If you don't get what you want, you SUFFER...
+              </Text>
+              <Text style={[styles.quoteIcon, styles.quoteIconRight]}>"</Text>
+            </View>
+          </Animated.View>
+        </View>
       </View>
       {/* Main Content */}
       <ScrollView
@@ -370,19 +388,22 @@ const styles = StyleSheet.create({
     backgroundColor: '#222',
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
-    paddingTop: 24,
+    paddingTop: 30,
+    paddingBottom: 5,
     overflow: 'hidden',
+    height: 105,
   },
   headerWrapper: {
-    paddingTop: 24,
-    paddingBottom: 10,
-    marginTop: 15,
+    height: 74,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 20,
   },
   headerContent: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 20,
   },
   headerTitle: {
     color: '#fff',
@@ -421,7 +442,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     lineHeight: 24,
     textAlign: 'left',
-    backgroundColor: '#333',
+    backgroundColor: '#222',
     padding: 12,
     borderRadius: 10,
     width: '100%',
@@ -642,5 +663,21 @@ const styles = StyleSheet.create({
       transform: [{ scale: 0.98 }],
       transition: 'transform 0.2s ease-in-out',
     },
+  },
+  quoteWrapper: {
+    width: '100%',
+  },
+  quoteSection: {
+    position: 'relative',
+    width: '100%',
+  },
+  quoteBg: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: '100%',
+    backgroundColor: '#333',
+    transformOrigin: 'top',
   },
 });
