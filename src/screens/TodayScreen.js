@@ -117,7 +117,9 @@ export default function TodayScreen({ navigation, route }) {
 
   const handleLessonPress = (lesson) => {
     setSelectedLesson(lesson);
-    setShowAudioPlayer(true);
+    setTimeout(() => {
+      setShowAudioPlayer(true);
+    }, 100);
   };
 
   const scrollToActiveDate = () => {
@@ -422,8 +424,11 @@ export default function TodayScreen({ navigation, route }) {
         </View>
       </ScrollView>
       <AudioPlayerModal
-        visible={showAudioPlayer}
-        onClose={() => setShowAudioPlayer(false)}
+        visible={showAudioPlayer && selectedLesson !== null}
+        onClose={() => {
+          setShowAudioPlayer(false);
+          setSelectedLesson(null);
+        }}
         lesson={selectedLesson}
       />
     </View>
@@ -582,34 +587,38 @@ const styles = StyleSheet.create({
   lessonCard: {
     flexDirection: 'row',
     backgroundColor: '#e5e5e5',
-    borderRadius: 10,
-    padding: 10,
-    marginTop: 10,
+    borderRadius: 15,
+    padding: 15,
+    marginTop: 15,
+    marginBottom: 5,
     alignItems: 'center',
+    minHeight: 100,
   },
   lessonImage: {
-    width: 60,
-    height: 60,
-    borderRadius: 10,
+    width: 80,
+    height: 80,
+    borderRadius: 12,
   },
   lessonDetails: {
     flex: 1,
-    marginLeft: 10,
+    marginLeft: 15,
+    paddingRight: 10,
   },
   lessonTitle: {
     fontWeight: '600',
-    fontSize: 16,
+    fontSize: 18,
+    marginBottom: 4,
   },
   lessonSub: {
     color: '#999',
-    marginTop: 5,
-    fontSize: 13,
+    marginTop: 6,
+    fontSize: 14,
   },
   lessonPlayButton: {
-    width: 36,
-    height: 36,
+    width: 44,
+    height: 44,
     backgroundColor: '#000',
-    borderRadius: 18,
+    borderRadius: 22,
     alignItems: 'center',
     justifyContent: 'center',
   },
