@@ -13,7 +13,7 @@ import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import LessonCard from '../components/LessonCard';
-import AudioPlayerModal from '../components/AudioPlayerModal'
+import AudioPlayerModal from '../components/AudioPlayerModal';
 import { SAMPLE_AUDIO_FILES } from '../constants/audioFiles';
 import { format, addDays, isSameDay } from 'date-fns';
 
@@ -43,13 +43,11 @@ export default function TodayScreen({ navigation, route }) {
         duration: 250,
         useNativeDriver: true,
       }),
-      Animated.spring(slideAnim, {
+      Animated.timing(slideAnim, {
         toValue: isQuoteVisible ? 1 : 0,
+        duration: 300,
         useNativeDriver: true,
-        damping: 20,
-        stiffness: 200,
-        mass: 0.5,
-      })
+      }),
     ]).start();
   }, [isQuoteVisible]);
 
@@ -147,7 +145,6 @@ export default function TodayScreen({ navigation, route }) {
     if (scrollViewRef.current) {
       // Prevent default vertical scrolling when hovering over dates
       event.preventDefault();
-      
       // Use deltaY for horizontal scrolling (since we're converting vertical scroll to horizontal)
       const newOffset = scrollViewRef.current._contentOffset?.x || 0;
       scrollViewRef.current.scrollTo({
@@ -220,44 +217,31 @@ export default function TodayScreen({ navigation, route }) {
             </TouchableOpacity>
           </View>
         </View>
-
         {/* Quote Section */}
         <Animated.View style={[
-          styles.quoteWrapper,
           {
-            opacity: slideAnim.interpolate({
-              inputRange: [0, 0.5, 1],
-              outputRange: [0, 0.5, 1],
-              extrapolate: 'clamp',
-            }),
-            transform: [
-              {
-                translateY: slideAnim.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [-50, 0],
-                  extrapolate: 'clamp',
-                })
-              },
-              {
-                scaleY: slideAnim.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [0, 1],
-                  extrapolate: 'clamp',
-                })
-              }
-            ]
+            overflow: 'hidden',
+            position: 'relative',
+            backgroundColor: '#222',
+            paddingVertical: 10,
+            opacity: slideAnim,
+            transform: [{
+              translateY: slideAnim.interpolate({
+                inputRange: [0, 1],
+                outputRange: [-100, 0],
+              })
+            }]
           }
         ]}>
           <View style={styles.quoteContainer}>
-            <Text style={styles.quoteIcon}>"</Text>
+            <Text style={[styles.quoteIcon, styles.quoteIconLeft]}>"</Text>
             <Text style={styles.quoteText}>
               If you don't get what you want, you SUFFER...
             </Text>
-            <Text style={styles.quoteIcon}>"</Text>
+            <Text style={[styles.quoteIcon, styles.quoteIconRight]}>"</Text>
           </View>
         </Animated.View>
       </View>
-
       {/* Main Content */}
       <ScrollView
         style={styles.mainContent}
@@ -270,7 +254,6 @@ export default function TodayScreen({ navigation, route }) {
             <Text style={styles.skipText}>Skip</Text>
           </TouchableOpacity>
         </View>
-
         {/* Dates Section with Arrows */}
         <View style={styles.datesSection}>
           <ScrollView 
@@ -309,7 +292,6 @@ export default function TodayScreen({ navigation, route }) {
               );
             })}
           </ScrollView>
-
           <View style={styles.arrowsContainer}>
             <TouchableOpacity 
               style={styles.dateArrow} 
@@ -317,7 +299,6 @@ export default function TodayScreen({ navigation, route }) {
             >
               <Ionicons name="chevron-back" size={20} color="#000" />
             </TouchableOpacity>
-
             <TouchableOpacity 
               style={styles.dateArrow} 
               onPress={() => scrollDates('right')}
@@ -326,7 +307,6 @@ export default function TodayScreen({ navigation, route }) {
             </TouchableOpacity>
           </View>
         </View>
-
         {/* Lesson / Audio Cards */}
         {lessons.map((lesson, index) => (
           <LessonCard
@@ -338,7 +318,6 @@ export default function TodayScreen({ navigation, route }) {
             isLocked={index > completedLessons.length}
           />
         ))}
-
         {/* Notes Section */}
         <View style={styles.notesHeaderRow}>
           <Text style={styles.notesHeader}>Notes</Text>
@@ -346,7 +325,6 @@ export default function TodayScreen({ navigation, route }) {
             <Text style={styles.notesLink}>See all notes</Text>
           </TouchableOpacity>
         </View>
-
         {/* Notes Grid */}
         <View style={styles.notesGrid}>
           {/* "+" card for a new note */}
@@ -382,6 +360,7 @@ export default function TodayScreen({ navigation, route }) {
     </View>
   );
 }
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -391,12 +370,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#222',
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
+    paddingTop: 24,
     overflow: 'hidden',
+    height: 120,
   },
   headerWrapper: {
-    paddingTop: 32,
-    paddingBottom: 15,
-    marginTop: 20,
+    paddingTop: 24,
+    paddingBottom: 10,
+    marginTop: 15,
   },
   headerContent: {
     flexDirection: 'row',
@@ -416,32 +397,47 @@ const styles = StyleSheet.create({
     width: 24,
   },
   quoteContainer: {
-    paddingVertical: 10,
     paddingHorizontal: 20,
     position: 'relative',
+    alignItems: 'center',
   },
   quoteIcon: {
     color: '#fff',
     fontSize: 16,
     fontWeight: '800',
+    position: 'absolute',
+    zIndex: 1,
+  },
+  quoteIconLeft: {
+    left: 30,
+    top: 4,
+  },
+  quoteIconRight: {
+    right: 30,
+    bottom: 4,
   },
   quoteText: {
     color: '#fff',
     fontSize: 15,
-    marginVertical: 8,
+    marginVertical: 120,
     lineHeight: 24,
     textAlign: 'left',
+    backgroundColor: '#333',
+    padding: 12,
+    borderRadius: 10,
+    width: '100%',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 2,
   },
   mainContent: {
     paddingHorizontal: 20,
     flex: 1,
-  },
-
-  quoteWrapper: {
-    overflow: 'hidden',
-    position: 'relative',
-    height: 100,
-    transform: [{ translateY: 0 }],
   },
   dayTitleRow: {
     flexDirection: 'row',
@@ -449,7 +445,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginTop: 14,
     marginBottom: 10,
-    
   },
   dayTitle: {
     fontSize: 24,
@@ -649,4 +644,3 @@ const styles = StyleSheet.create({
     },
   },
 });
-
