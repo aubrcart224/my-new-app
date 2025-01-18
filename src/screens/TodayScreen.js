@@ -36,7 +36,7 @@ export default function TodayScreen({ navigation, route }) {
   const [quoteHeight, setQuoteHeight] = useState(0);
   const [lessonDurations, setLessonDurations] = useState({});
   const [lessons, setLessons] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingLessons, setIsLoadingLessons] = useState(true);
 
   const scrollViewRef = useRef(null);
 
@@ -204,10 +204,13 @@ export default function TodayScreen({ navigation, route }) {
     }
   };
 
-  // Load lessons with durations on mount
-  useEffect(() => {
-    const initializeLessons = async () => {
-      setIsLoading(true);
+  const loadLessons = async () => {
+    try {
+      // First, set the initial lessons without durations
+      setLessons(lessonsData);
+      setIsLoadingLessons(false);
+
+      // Then load the durations in the background
       const lessonsWithDurations = await Promise.all(
         lessonsData.map(async (lesson) => {
           if (lesson.audioUrl) {
@@ -225,20 +228,14 @@ export default function TodayScreen({ navigation, route }) {
         })
       );
       setLessons(lessonsWithDurations);
-      setIsLoading(false);
-    };
+    } catch (error) {
+      console.error('Error loading lessons:', error);
+    }
+  };
 
-    initializeLessons();
+  useEffect(() => {
+    loadLessons();
   }, []);
-
-  // In your render method, conditionally render based on loading state
-  if (isLoading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <Text>Loading lessons...</Text>
-      </View>
-    );
-  }
 
   return (
     <View style={styles.container}>
