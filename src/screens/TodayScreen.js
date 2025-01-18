@@ -24,13 +24,21 @@ export default function TodayScreen({ navigation, route }) {
   const [isQuoteVisible, setIsQuoteVisible] = useState(true);
 
   const rotateAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
-    Animated.timing(rotateAnim, {
-      toValue: isQuoteVisible ? 1 : 0,
-      duration: 300,
-      useNativeDriver: true,
-    }).start();
+    Animated.parallel([
+      Animated.timing(rotateAnim, {
+        toValue: isQuoteVisible ? 1 : 0,
+        duration: 300,
+        useNativeDriver: true,
+      }),
+      Animated.timing(slideAnim, {
+        toValue: isQuoteVisible ? 1 : 0,
+        duration: 300,
+        useNativeDriver: true,
+      })
+    ]).start();
   }, [isQuoteVisible]);
 
   const rotate = rotateAnim.interpolate({
@@ -127,48 +135,47 @@ export default function TodayScreen({ navigation, route }) {
 
   return (
     <View style={styles.container}>
-      {/* Header */}
-      <View style={styles.headerWrapper}>
-        <View style={styles.headerContent}>
-          <TouchableOpacity 
-            style={styles.quoteToggle}
-            onPress={() => setIsQuoteVisible(!isQuoteVisible)}
-          >
-            <Animated.View style={{ transform: [{ rotate }] }}>
-              <Ionicons 
-                name="chevron-down"
-                size={24} 
-                color="#fff" 
-              />
-            </Animated.View>
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>MINDSET</Text>
-          <TouchableOpacity style={styles.menuIcon}>
-            <Ionicons name="menu" size={24} color="#fff" />
-          </TouchableOpacity>
+      <View style={styles.headerContainer}>
+        {/* Header */}
+        <View style={styles.headerWrapper}>
+          <View style={styles.headerContent}>
+            <TouchableOpacity 
+              style={styles.quoteToggle}
+              onPress={() => setIsQuoteVisible(!isQuoteVisible)}
+            >
+              <Animated.View style={{ transform: [{ rotate }] }}>
+                <Ionicons 
+                  name="chevron-down"
+                  size={24} 
+                  color="#fff" 
+                />
+              </Animated.View>
+            </TouchableOpacity>
+            <Text style={styles.headerTitle}>MINDSET</Text>
+            <TouchableOpacity style={styles.menuIcon}>
+              <Ionicons name="menu" size={24} color="#fff" />
+            </TouchableOpacity>
+          </View>
         </View>
-      </View>
 
-      {/* Quote Section */}
-      <View style={styles.quoteWrapper}>
-        <Animated.View style={{
-          opacity: rotateAnim,
-          transform: [{
-            translateY: rotateAnim.interpolate({
+        {/* Quote Section */}
+        <Animated.View style={[
+          styles.quoteWrapper,
+          {
+            height: slideAnim.interpolate({
               inputRange: [0, 1],
-              outputRange: [-20, 0],
-            })
-          }]
-        }}>
-          {isQuoteVisible && (
-            <View style={styles.quoteContainer}>
-              <Text style={styles.quoteIcon}>"</Text>
-              <Text style={styles.quoteText}>
-                If you don't get what you want, you SUFFER...
-              </Text>
-              <Text style={styles.quoteIcon}>"</Text>
-            </View>
-          )}
+              outputRange: [0, 100], // Adjust this value based on your quote height
+            }),
+            opacity: rotateAnim,
+          }
+        ]}>
+          <View style={styles.quoteContainer}>
+            <Text style={styles.quoteIcon}>"</Text>
+            <Text style={styles.quoteText}>
+              If you don't get what you want, you SUFFER...
+            </Text>
+            <Text style={styles.quoteIcon}>"</Text>
+          </View>
         </Animated.View>
       </View>
 
@@ -277,8 +284,12 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
   },
-  headerWrapper: {
+  headerContainer: {
     backgroundColor: '#222',
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+  },
+  headerWrapper: {
     paddingTop: 32,
     paddingBottom: 20,
   },
@@ -300,12 +311,8 @@ const styles = StyleSheet.create({
     width: 24,
   },
   quoteContainer: {
-    backgroundColor: '#222',
-    paddingVertical: 0,
+    paddingVertical: 10,
     paddingHorizontal: 20,
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
-    marginBottom: 10,
   },
   quoteIcon: {
     color: '#fff',
@@ -325,10 +332,6 @@ const styles = StyleSheet.create({
   },
 
   quoteWrapper: {
-    backgroundColor: '#222',
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
-    marginBottom: 10,
     overflow: 'hidden',
   },
   dayTitleRow: {
