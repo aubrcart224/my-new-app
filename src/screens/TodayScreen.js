@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Image,
   Animated,
+  Dimensions,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -14,7 +15,14 @@ import { useFocusEffect } from '@react-navigation/native';
 import LessonCard from '../components/LessonCard';
 import AudioPlayerModal from '../components/AudioPlayerModal'
 import { SAMPLE_AUDIO_FILES } from '../constants/audioFiles';
+import { format, addDays, isSameDay } from 'date-fns';
 
+const { width } = Dimensions.get('window');
+const DATE_ITEM_WIDTH = 60;
+const DATE_ITEM_MARGIN = 10;
+const DATES_CONTAINER_PADDING = 20;
+const TODAY = new Date();
+const NUMBER_OF_DAYS = 30; // Show 30 days
 
 export default function TodayScreen({ navigation, route }) {
   const [notes, setNotes] = useState([]);
@@ -22,9 +30,11 @@ export default function TodayScreen({ navigation, route }) {
   const [selectedLesson, setSelectedLesson] = useState(null);
   const [showAudioPlayer, setShowAudioPlayer] = useState(false);
   const [isQuoteVisible, setIsQuoteVisible] = useState(true);
+  const [selectedDate, setSelectedDate] = useState(TODAY);
 
   const rotateAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(1)).current;
+  const scrollViewRef = useRef(null);
 
   useEffect(() => {
     Animated.parallel([
@@ -103,6 +113,57 @@ export default function TodayScreen({ navigation, route }) {
   const handleLessonPress = (lesson) => {
     setSelectedLesson(lesson);
     setShowAudioPlayer(true);
+  };
+
+  const scrollToActiveDate = () => {
+    if (scrollViewRef.current) {
+      scrollViewRef.current.scrollTo({
+        x: DATE_ITEM_WIDTH + DATE_ITEM_MARGIN,
+        animated: true
+      });
+    }
+  };
+
+  useEffect(() => {
+    setTimeout(scrollToActiveDate, 100);
+  }, []);
+
+  const generateDates = () => {
+    const dates = [];
+    for (let i = 0; i < NUMBER_OF_DAYS; i++) {
+      dates.push(addDays(TODAY, i));
+    }
+    return dates;
+  };
+
+  const handleDateSelect = (date) => {
+    setSelectedDate(date);
+    // Here you can add logic to load data for the selected date
+  };
+
+  const handleMouseWheel = (event) => {
+    if (scrollViewRef.current) {
+      // Prevent default vertical scrolling when hovering over dates
+      event.preventDefault();
+      
+      // Use deltaY for horizontal scrolling (since we're converting vertical scroll to horizontal)
+      const newOffset = scrollViewRef.current._contentOffset?.x || 0;
+      scrollViewRef.current.scrollTo({
+        x: newOffset + (event.nativeEvent.deltaY * 0.5), // Adjust the 0.5 multiplier to control scroll speed
+        animated: true
+      });
+    }
+  };
+
+  const scrollDates = (direction) => {
+    if (scrollViewRef.current) {
+      const newOffset = (scrollViewRef.current._contentOffset?.x || 0) + 
+        (direction === 'left' ? -200 : 200); // Adjust 200 to control scroll distance
+      scrollViewRef.current.scrollTo({
+        x: Math.max(0, newOffset),
+        animated: true
+      });
+    }
   };
 
   const lessons = [
@@ -192,37 +253,61 @@ export default function TodayScreen({ navigation, route }) {
           </TouchableOpacity>
         </View>
 
-        {/* Horizontal Dates Row */}
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          <View style={styles.dateItem}>
-            <Text style={styles.dateNumber}>08</Text>
-            <Text style={styles.dateLabel}>SUN</Text>
+        {/* Dates Section with Arrows */}
+        <View style={styles.datesSection}>
+          <ScrollView 
+            ref={scrollViewRef}
+            horizontal 
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.datesContainer}
+            snapToInterval={DATE_ITEM_WIDTH + DATE_ITEM_MARGIN}
+            decelerationRate="fast"
+            snapToAlignment="center"
+            style={styles.datesScrollView}
+            onScroll={(event) => {
+              scrollViewRef.current._contentOffset = event.nativeEvent.contentOffset;
+            }}
+            scrollEventThrottle={16}
+            onWheel={handleMouseWheel}
+          >
+            {generateDates().map((date) => {
+              const isActive = isSameDay(date, selectedDate);
+              return (
+                <TouchableOpacity
+                  key={date.toISOString()}
+                  onPress={() => handleDateSelect(date)}
+                  style={[
+                    isActive ? styles.dateItemActive : styles.dateItem,
+                    styles.dateItemHover, // Add hover effect
+                  ]}
+                >
+                  <Text style={isActive ? styles.dateNumberActive : styles.dateNumber}>
+                    {format(date, 'dd')}
+                  </Text>
+                  <Text style={isActive ? styles.dateLabelActive : styles.dateLabel}>
+                    {format(date, 'EEE').toUpperCase()}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
+
+          <View style={styles.arrowsContainer}>
+            <TouchableOpacity 
+              style={styles.dateArrow} 
+              onPress={() => scrollDates('left')}
+            >
+              <Ionicons name="chevron-back" size={20} color="#000" />
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              style={styles.dateArrow} 
+              onPress={() => scrollDates('right')}
+            >
+              <Ionicons name="chevron-forward" size={20} color="#000" />
+            </TouchableOpacity>
           </View>
-          <View style={styles.dateItemActive}>
-            <Text style={styles.dateNumberActive}>09</Text>
-            <Text style={styles.dateLabelActive}>MON</Text>
-          </View>
-          <View style={styles.dateItem}>
-            <Text style={styles.dateNumber}>10</Text>
-            <Text style={styles.dateLabel}>TUE</Text>
-          </View>
-          <View style={styles.dateItem}>
-            <Text style={styles.dateNumber}>11</Text>
-            <Text style={styles.dateLabel}>WED</Text>
-          </View>
-          <View style={styles.dateItem}>
-            <Text style={styles.dateNumber}>12</Text>
-            <Text style={styles.dateLabel}>THU</Text>
-          </View>
-          <View style={styles.dateItem}>
-            <Text style={styles.dateNumber}>13</Text>
-            <Text style={styles.dateLabel}>FRI</Text>
-          </View>
-          <View style={styles.dateItem}>
-            <Text style={styles.dateNumber}>14</Text>
-            <Text style={styles.dateLabel}>SAT</Text>
-          </View>
-        </ScrollView>
+        </View>
 
         {/* Lesson / Audio Cards */}
         {lessons.map((lesson, index) => (
@@ -288,10 +373,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#222',
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
+    
   },
   headerWrapper: {
     paddingTop: 32,
     paddingBottom: 20,
+    marginTop:20,
   },
   headerContent: {
     flexDirection: 'row',
@@ -338,8 +425,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginTop: 10,
+    marginTop: 14,
     marginBottom: 10,
+    
   },
   dayTitle: {
     fontSize: 24,
@@ -349,14 +437,23 @@ const styles = StyleSheet.create({
     color: '#555',
   },
   dateItem: {
-    width: 60,
+    width: DATE_ITEM_WIDTH,
     height: 70,
-    marginRight: 10,
-    backgroundColor: '#dadada',
+    marginRight: DATE_ITEM_MARGIN,
+    backgroundColor: '#f0f0f0',
     borderRadius: 10,
-    marginBottom: 20,
+    marginVertical: 10,
     alignItems: 'center',
     justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
+    transform: [{ scale: 0.95 }], // Slightly smaller by default
   },
   dateNumber: {
     fontSize: 16,
@@ -367,13 +464,22 @@ const styles = StyleSheet.create({
     color: '#888',
   },
   dateItemActive: {
-    width: 60,
+    width: DATE_ITEM_WIDTH,
     height: 70,
-    marginRight: 10,
+    marginRight: DATE_ITEM_MARGIN,
     backgroundColor: '#000',
     borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 5,
+    transform: [{ scale: 1 }], // Full size when active
   },
   dateNumberActive: {
     fontSize: 16,
@@ -476,6 +582,49 @@ const styles = StyleSheet.create({
     fontSize: 10,
     color: '#aaa',
     textAlign: 'right',
+  },
+  datesSection: {
+    marginVertical: 10,
+  },
+  arrowsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 10,
+    paddingHorizontal: 5,
+    width: '100%',
+  },
+  dateArrow: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#f0f0f0',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
+  },
+  datesScrollView: {
+    flex: 1,
+    cursor: 'grab',
+    WebkitOverflowScrolling: 'touch',
+  },
+  datesContainer: {
+    paddingHorizontal: 10,
+    //paddingBottom: 5, // Add some space above the arrows
+  },
+  dateItemHover: {
+    // Add hover effect for web
+    ':hover': {
+      transform: [{ scale: 0.98 }],
+      transition: 'transform 0.2s ease-in-out',
+    },
   },
 });
 
