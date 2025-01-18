@@ -16,13 +16,26 @@ export default function LessonCard({ lesson, onPress, onComplete, isLocked, isCo
 
   const handleCheckboxPress = () => {
     if (!isLocked) {
-      onComplete(lesson.id);
+      setTimeout(() => {
+        onComplete(lesson.id);
+      }, 50);
+    }
+  };
+
+  const handlePlayPress = () => {
+    if (!isLocked) {
+      setTimeout(() => {
+        onPress(lesson);
+      }, 50);
     }
   };
 
   const panResponder = useRef(
     PanResponder.create({
-      onMoveShouldSetPanResponder: () => !isLocked && !isCompleted,
+      onStartShouldSetPanResponder: () => false,
+      onMoveShouldSetPanResponder: (_, gesture) => {
+        return !isLocked && !isCompleted && Math.abs(gesture.dx) > 10;
+      },
       onPanResponderMove: (_, gesture) => {
         if (gesture.dx < 0) {
           pan.x.setValue(gesture.dx);
@@ -71,6 +84,7 @@ export default function LessonCard({ lesson, onPress, onComplete, isLocked, isCo
           style={styles.checkboxContainer}
           onPress={handleCheckboxPress}
           disabled={isLocked}
+          activeOpacity={0.7}
         >
           <View style={[
             styles.checkbox,
@@ -106,8 +120,9 @@ export default function LessonCard({ lesson, onPress, onComplete, isLocked, isCo
             isLocked && styles.lockedButton,
             isCompleted && styles.completedButton
           ]}
-          onPress={() => !isLocked && onPress(lesson)}
+          onPress={handlePlayPress}
           disabled={isLocked}
+          activeOpacity={0.7}
         >
           <Ionicons
             name={isCompleted ? "reload" : "play"}
