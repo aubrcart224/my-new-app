@@ -39,16 +39,16 @@ export default function LandingScreen({ navigation }) {
 
   const interpolatedColors = {
     start: gradientAnimation.interpolate({
-      inputRange: [0, 0.5, 1],
-      outputRange: ['#000428', '#004e92', '#2c3e50']
+      inputRange: [0, 0.33, 0.66, 1],
+      outputRange: ['#4A0B50', '#2A0B3C', '#090D2C', '#4A0B50']
     }),
     middle: gradientAnimation.interpolate({
-      inputRange: [0, 0.5, 1],
-      outputRange: ['#004e92', '#2c3e50', '#004e92']
+      inputRange: [0, 0.33, 0.66, 1],
+      outputRange: ['#090D2C', '#4A0B50', '#2A0B3C', '#090D2C']
     }),
     end: gradientAnimation.interpolate({
-      inputRange: [0, 0.5, 1],
-      outputRange: ['#2c3e50', '#000428', '#004e92']
+      inputRange: [0, 0.33, 0.66, 1],
+      outputRange: ['#2A0B3C', '#090D2C', '#4A0B50', '#2A0B3C']
     })
   };
 
@@ -95,8 +95,9 @@ export default function LandingScreen({ navigation }) {
           interpolatedColors.end
         ]}
         style={styles.gradient}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
+        start={{ x: 0.2, y: 0 }}
+        end={{ x: 0.8, y: 1 }}
+        locations={[0.2, 0.5, 0.8]}
       >
         <View style={styles.content}>
           <Text style={styles.title}>MINDSET</Text>
