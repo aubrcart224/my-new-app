@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -7,16 +7,10 @@ import {
   TouchableOpacity,
   Modal,
   ActivityIndicator,
-  Platform,
 } from 'react-native';
 import Slider from '@react-native-community/slider';
 import { Ionicons } from '@expo/vector-icons';
-import { SAMPLE_AUDIO_FILES } from '../constants/audioFiles';
-
-let Audio;
-if (Platform.OS !== 'web') {
-  Audio = require('expo-av').Audio;
-}
+import { Audio } from 'expo-av';
 
 export default function AudioPlayerModal({ visible, onClose, lesson }) {
   const [sound, setSound] = useState(null);
@@ -25,188 +19,137 @@ export default function AudioPlayerModal({ visible, onClose, lesson }) {
   const [duration, setDuration] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
-  const audioRef = useRef(null);
 
+  /**
+   * If the modal is closed (visible === false), unload the audio.
+   * If the modal is open, do nothing until user presses play.
+   */
   useEffect(() => {
-    console.log('AudioPlayerModal mounted');
-    return () => {
-      console.log('AudioPlayerModal unmounted');
-    };
-  }, []);
-
-  useEffect(() => {
-    return () => {
-      if (Platform.OS !== 'web' && sound) {
-        sound.unloadAsync();
-      }
-    };
-  }, [sound]);
-
-  const isSupportedFormat = (url) => {
-    const supportedExtensions = ['mp3', 'wav', 'ogg'];
-    const extension = url.split('.').pop().toLowerCase();
-    return supportedExtensions.includes(extension);
-  };
-
-  const loadAudio = async () => {
-    const audioUrl = lesson.audioUrl;
-
-    if (!audioUrl) {
-      console.error('No audioUrl provided for the lesson.');
-      setError('No audio URL provided.');
-      setIsLoading(false);
-      return;
+    if (!visible) {
+      unloadAudio();
     }
+    // Cleanup automatically if the component unmounts
+    return () => {
+      unloadAudio();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [visible]);
 
-    console.log('Loading Audio from lesson.audioUrl:', audioUrl);
-    
-    try {
-      setIsLoading(true);
+  // Unload and free resources
+  const unloadAudio = async () => {
+    if (sound) {
+      try {
+        await sound.unloadAsync();
+      } catch (unloadError) {
+        console.warn('Error unloading sound:', unloadError);
+      }
+      setSound(null);
+      setIsPlaying(false);
+      setPosition(0);
+      setDuration(0);
+      setIsLoading(false);
       setError(null);
-
-      if (Platform.OS === 'web') {
-        const audio = new Audio(audioUrl);
-        
-        audio.onloadedmetadata = () => {
-          console.log('Audio metadata loaded');
-          setDuration(audio.duration * 1000);
-        };
-
-        audio.oncanplaythrough = () => {
-          console.log('Audio can play through');
-          setIsLoading(false);
-          setSound(audio);
-        };
-        
-        audio.onerror = (e) => {
-          console.error('Audio loading error:', e);
-          setError(`Failed to load audio: ${e.target.error?.message || 'Unknown error'}`);
-          setIsLoading(false);
-        };
-        
-        audio.crossOrigin = "anonymous";
-        audioRef.current = audio;
-      } else {
-        await Audio.setAudioModeAsync({
-          playsInSilentModeIOS: true,
-          staysActiveInBackground: true,
-          shouldDuckAndroid: true,
-        });
-
-        const { sound: audioSound } = await Audio.Sound.createAsync(
-          { uri: audioUrl },
-          { shouldPlay: false },
-          onPlaybackStatusUpdate
-        );
-        console.log('Native audio loaded');
-        setSound(audioSound);
-        setIsLoading(false);
-      }
-    } catch (error) {
-      console.error('Error loading audio:', error);
-      setError(`Failed to load audio: ${error.message}`);
-      setIsLoading(false);
     }
   };
 
-  useEffect(() => {
-    if (visible && lesson?.audioUrl) {
-      loadAudio();
-    }
-    return () => {
-      if (Platform.OS === 'web' && audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current.src = '';
-      } else if (sound) {
-        sound.unloadAsync();
-      }
-    };
-  }, [visible, lesson]);
-
+  // Playback status updates
   const onPlaybackStatusUpdate = (status) => {
     if (status.isLoaded) {
       setPosition(status.positionMillis);
       setDuration(status.durationMillis);
       setIsPlaying(status.isPlaying);
     } else if (status.error) {
-      console.error(`Encountered a fatal error during playback: ${status.error}`);
+      console.error(`Playback error: ${status.error}`);
       setError(`Playback error: ${status.error}`);
     }
   };
 
+  /**
+   * Play/Pause button logic:
+   * - If there's no Sound loaded yet, create it & play
+   * - Otherwise, toggle play/pause
+   */
   const playPause = async () => {
-    try {
-      if (Platform.OS === 'web') {
-        if (!audioRef.current) {
-          setError('Audio is not loaded yet. Please wait.');
-          return;
-        }
-
+    if (!sound) {
+      // Load and then play
+      await loadAndPlay();
+    } else {
+      // Toggle play/pause
+      try {
         if (isPlaying) {
-          audioRef.current.pause();
+          await sound.pauseAsync();
+          setIsPlaying(false);
         } else {
-          await audioRef.current.play();
+          await sound.playAsync();
+          setIsPlaying(true);
         }
-        setIsPlaying(!isPlaying);
-      } else {
-        if (sound) {
-          if (isPlaying) {
-            await sound.pauseAsync();
-          } else {
-            await sound.playAsync();
-          }
-          setIsPlaying(!isPlaying);
-        } else {
-          setError('Audio is not loaded yet. Please wait.');
-        }
+      } catch (err) {
+        setError(`Playback error: ${err.message}`);
       }
-    } catch (error) {
-      console.error('Error in playPause:', error);
-      setError(`Playback error: ${error.message}`);
     }
   };
 
-  const seek = async (value) => {
+  /**
+   * Load audio and start playing immediately
+   */
+  const loadAndPlay = async () => {
+    if (!lesson?.audioUrl) {
+      setError('No audio URL provided.');
+      return;
+    }
     try {
-      if (Platform.OS === 'web' && audioRef.current) {
-        audioRef.current.currentTime = value / 1000;
-        setPosition(value);
-      } else if (sound) {
-        await sound.setPositionAsync(value);
-      }
-    } catch (error) {
-      console.error('Error in seek:', error);
-      setError(`Seek error: ${error.message}`);
+      setIsLoading(true);
+      setError(null);
+
+      // Allow playback in silent mode
+      await Audio.setAudioModeAsync({
+        playsInSilentModeIOS: true,
+        staysActiveInBackground: true,
+        shouldDuckAndroid: true,
+      });
+
+      const { sound: newSound } = await Audio.Sound.createAsync(
+        { uri: lesson.audioUrl },
+        { shouldPlay: true }, // start playing once loaded
+        onPlaybackStatusUpdate
+      );
+      setSound(newSound);
+      setIsLoading(false);
+      setIsPlaying(true);
+    } catch (err) {
+      console.error('Error loading audio:', err);
+      setError(`Failed to load audio: ${err.message}`);
+      setIsLoading(false);
     }
   };
 
-  const skipForward = async () => {
+  // Seek (slider move)
+  const seek = async (value) => {
+    if (!sound) return;
+    try {
+      await sound.setPositionAsync(value);
+    } catch (err) {
+      setError(`Seek error: ${err.message}`);
+    }
+  };
+
+  // Skip forward/back 10s
+  const skipForward = () => {
     const newPosition = Math.min(position + 10000, duration);
     seek(newPosition);
   };
-
-  const skipBackward = async () => {
+  const skipBackward = () => {
     const newPosition = Math.max(position - 10000, 0);
     seek(newPosition);
   };
 
+  // Format ms -> M:SS
   const formatTime = (millis) => {
+    if (!millis) return '0:00';
     const minutes = Math.floor(millis / 60000);
-    const seconds = ((millis % 60000) / 1000).toFixed(0);
-    return `${minutes}:${seconds.padStart(2, '0')}`;
+    const seconds = Math.floor((millis % 60000) / 1000);
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   };
-
-  useEffect(() => {
-    if (Platform.OS === 'web' && audioRef.current) {
-      const updateProgress = () => {
-        setPosition(audioRef.current.currentTime * 1000);
-      };
-      audioRef.current.addEventListener('timeupdate', updateProgress);
-      return () => {
-        audioRef.current.removeEventListener('timeupdate', updateProgress);
-      };
-    }
-  }, [audioRef.current]);
 
   return (
     <Modal
@@ -242,6 +185,7 @@ export default function AudioPlayerModal({ visible, onClose, lesson }) {
             </View>
           )}
 
+          {/* Slider & time display */}
           <View style={styles.progressContainer}>
             <Slider
               style={styles.progressBar}
@@ -259,6 +203,7 @@ export default function AudioPlayerModal({ visible, onClose, lesson }) {
             </View>
           </View>
 
+          {/* Playback controls */}
           <View style={styles.controls}>
             <TouchableOpacity onPress={skipBackward} style={styles.controlButton}>
               <Text style={styles.skipText}>10s</Text>
@@ -267,7 +212,7 @@ export default function AudioPlayerModal({ visible, onClose, lesson }) {
 
             <TouchableOpacity onPress={playPause} style={styles.playButton}>
               <Ionicons
-                name={isPlaying ? "pause" : "play"}
+                name={isPlaying ? 'pause' : 'play'}
                 size={32}
                 color="#000"
               />
@@ -385,4 +330,3 @@ const styles = StyleSheet.create({
     color: '#ff4444',
   },
 });
-

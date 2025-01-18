@@ -1,4 +1,4 @@
 export const SAMPLE_AUDIO_FILES = {
-  focus: 'https://www2.cs.uic.edu/~i101/SoundFiles/StarWars60.wav',
-  unleash: 'https://www2.cs.uic.edu/~i101/SoundFiles/CantinaBand60.wav',
+  focus: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
+  unleash: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
 };
