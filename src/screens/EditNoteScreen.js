@@ -112,14 +112,14 @@ const styles = StyleSheet.create({
   },
   closeButton: {
     padding: 8,
-    marginTop: 40,
+    //marginTop: 40,
   },
   saveButton: {
     backgroundColor: '#222',
     paddingHorizontal: 20,
     paddingVertical: 8,
     borderRadius: 20,
-    marginTop: 40,
+    //marginTop: 40,
   },
   saveButtonText: {
     color: '#fff',
@@ -133,6 +133,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: '600',
     marginBottom: 8,
+    
   },
   subtitleInput: {
     fontSize: 18,
