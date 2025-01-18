@@ -372,7 +372,6 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 20,
     paddingTop: 24,
     overflow: 'hidden',
-    height: 120,
   },
   headerWrapper: {
     paddingTop: 24,
@@ -400,6 +399,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     position: 'relative',
     alignItems: 'center',
+    marginBottom: 15,
   },
   quoteIcon: {
     color: '#fff',
@@ -419,13 +419,13 @@ const styles = StyleSheet.create({
   quoteText: {
     color: '#fff',
     fontSize: 15,
-    marginVertical: 120,
     lineHeight: 24,
     textAlign: 'left',
     backgroundColor: '#333',
     padding: 12,
     borderRadius: 10,
     width: '100%',
+    paddingVertical: 15,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
